@@ -1,7 +1,8 @@
 import React from 'react'
-import { Radio } from 'lucide-react'
+import { Radio, Menu, LogIn } from 'lucide-react'
+import ThemeToggle from './ThemeToggle.jsx'
 
-export default function Header({ connected, presence, catalog }) {
+export default function Header({ connected, presence, catalog, theme, onToggleTheme, onOpenMenu, onOpenAuth }) {
   const counts = catalog?.counts
   const playable = counts?.playable ?? '—'
 
@@ -19,6 +20,7 @@ export default function Header({ connected, presence, catalog }) {
         <div className="header__center">
           <nav className="nav" aria-label="Primary">
             <a href="#channels" className="nav__link">Channels</a>
+            <a href="#faq" className="nav__link">FAQ</a>
             <a href="#footer" className="nav__link">Sources</a>
           </nav>
         </div>
@@ -37,6 +39,16 @@ export default function Header({ connected, presence, catalog }) {
             <span className="chip__key">ON AIR</span>
             <b className="mono">{presence?.listeners ?? 0}</b>
           </span>
+
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+
+          <button className="btn btn--primary header__signin" onClick={onOpenAuth}>
+            <LogIn size={14} /> <span>Sign in</span>
+          </button>
+
+          <button className="header__burger" onClick={onOpenMenu} aria-label="Open menu">
+            <Menu size={20} />
+          </button>
         </div>
       </div>
     </header>

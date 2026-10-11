@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Play, Square, Search, Copy, Check, RotateCw } from 'lucide-react'
+import { withUTM } from '../hooks/useUTM.js'
+import { useFeedback } from './ui/Feedback.jsx'
 
 const FILTERS = [
   { id: 'all', label: 'ALL' },
@@ -21,16 +23,22 @@ function useAllChannels(catalog) {
 }
 
 function StationCard({ station, status, isPlaying, onPlay, onStop }) {
+  const { toast } = useFeedback()
   const [copied, setCopied] = useState(false)
   const st = status?.[station.id]
   const online = st?.online
 
-  const copy = () => {
-    const url = `${location.origin}/?stationId=${encodeURIComponent(station.id)}`
-    navigator.clipboard?.writeText(url).then(() => {
+  const copy = async () => {
+    const base = `${location.origin}/?stationId=${encodeURIComponent(station.id)}`
+    const url = withUTM(base)
+    try {
+      await navigator.clipboard.writeText(url)
       setCopied(true)
+      toast(`Link copied — ${station.name_en}`, { type: 'success' })
       setTimeout(() => setCopied(false), 1600)
-    })
+    } catch {
+      toast('Could not copy link', { type: 'error' })
+    }
   }
 
   return (

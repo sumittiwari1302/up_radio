@@ -71,8 +71,12 @@ export default function Footer({ catalog }) {
       </div>
 
       <div className="container footer__bar">
-        <span>© {new Date().getFullYear()} UP Radio · MIT Licensed</span>
-        <span>Not affiliated with Prasar Bharati. Audio is streamed from broadcasters’ public players.</span>
+        <span>MIT License • © 2026 Sumit Tiwari</span>
+        {(catalog?.updated_at || catalog?.ts) && (
+          <span className="mono">
+            Last updated: {new Date(catalog.updated_at || catalog.ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })} IST
+          </span>
+        )}
       </div>
     </footer>
   )

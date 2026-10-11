@@ -4,12 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UP Radio — उत्तर प्रदेश रेडियो</title>
-    <meta name="description" content="Live Uttar Pradesh radio — Akashvani / AIR streams" />
+    <meta
+      name="description"
+      content="Live Uttar Pradesh radio — Akashvani / All India Radio streams from Lucknow, Kanpur, Varanasi, Prayagraj, Agra, Gorakhpur and more."
+    />
+    <meta name="theme-color" content="#0b0b0d" />
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f4a12a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' font-weight='700' text-anchor='middle' fill='%231a1204'%3EUP%3C/text%3E%3C/svg%3E" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/assets/index-Dko7_8W7.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-B91bkAlh.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      // Apply saved theme before paint to avoid a flash of the wrong theme.
+      (function () {
+        try {
+          var t = localStorage.getItem('up-radio:theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-TjpmAccl.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-X37PpFA_.css">
   </head>
   <body>
     <div id="root"></div>
