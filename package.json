@@ -1,0 +1,25 @@
+{
+  "name": "up-radio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Uttar Pradesh Radio — live Akashvani / All India Radio streams for Uttar Pradesh, with a REST catalog and a WebSocket live-status channel.",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "build:catalog": "node server/build-catalog.js",
+    "refresh": "node server/refresh.js",
+    "client:install": "npm --prefix client install",
+    "client:dev": "npm --prefix client run dev",
+    "client:build": "npm --prefix client run build",
+    "build": "npm --prefix client run build",
+    "app": "npm run client:build && npm start"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  }
+}
