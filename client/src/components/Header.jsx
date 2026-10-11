@@ -9,7 +9,7 @@ export default function Header({ connected, presence, catalog, theme, onToggleTh
   return (
     <header className="header" id="top">
       <div className="container header__row">
-        <a className="brand" href="#top">
+        <a className="brand" href="#main">
           <span className="brand__mark">UP</span>
           <span className="brand__text">
             <span className="brand__en">UTTAR PRADESH RADIO</span>
