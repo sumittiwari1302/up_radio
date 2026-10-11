@@ -1435,17 +1435,20 @@ a {
 
   .fab {
     padding: 0.7rem;
-    bottom: 5.25rem;
+    bottom: 1.25rem;
+    left: 1rem;
   }
 
   .fab--right {
     bottom: 1.25rem;
-    right: 1.25rem;
+    right: 1rem;
+    left: auto;
   }
 
   .back-to-top {
     bottom: 1.25rem;
-    right: 1.25rem;
+    right: 1rem;
+    left: auto;
   }
 
   .cookie__inner {
