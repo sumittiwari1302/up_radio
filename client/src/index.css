@@ -1435,6 +1435,17 @@ a {
 
   .fab {
     padding: 0.7rem;
+    bottom: 5.25rem;
+  }
+
+  .fab--right {
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+
+  .back-to-top {
+    bottom: 1.25rem;
+    right: 1.25rem;
   }
 
   .cookie__inner {
@@ -1449,10 +1460,6 @@ a {
   .cookie__actions .btn {
     flex: 1;
     justify-content: center;
-  }
-
-  .back-to-top {
-    bottom: 5.25rem;
   }
 }
 
