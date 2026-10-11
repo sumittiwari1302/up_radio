@@ -83,6 +83,39 @@ a {
   flex-wrap: wrap;
 }
 
+.header__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.nav__link {
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.nav__link:hover {
+  color: var(--text);
+  background: var(--panel);
+}
+
+.header__right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -179,23 +212,11 @@ a {
 .hero__inner {
   border: 1px solid var(--border);
   border-radius: 22px;
-  padding: 2rem;
+  padding: 2.25rem;
   background:
     radial-gradient(600px 260px at 0% 0%, rgba(244, 161, 42, 0.14) 0%, transparent 70%),
     linear-gradient(180deg, var(--panel) 0%, var(--bg-2) 100%);
   box-shadow: var(--shadow);
-}
-
-.hero__badges {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.1rem;
-}
-
-.chip--live.is-on {
-  border-color: rgba(87, 211, 140, 0.4);
-  color: var(--green);
 }
 
 .hero__title {
@@ -205,7 +226,7 @@ a {
   font-size: clamp(2rem, 5vw, 3.4rem);
   line-height: 1.05;
   letter-spacing: -0.02em;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .hero__hi {
@@ -223,30 +244,39 @@ a {
 .hero__now {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  margin-top: 1.5rem;
   padding: 1rem 1.15rem;
-  border: 1px solid var(--border-strong);
+  border: 1px solid rgba(87, 211, 140, 0.35);
   border-radius: var(--radius);
   background: var(--panel-2);
 }
 
+.hero__now > svg {
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.hero__now .btn {
+  margin-left: auto;
+}
+
 .hero__now-name {
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
 }
 
 .hero__now-hi {
   font-family: 'Noto Sans Devanagari', var(--font);
   color: var(--text-dim);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
 }
 
 .hero__now-meta {
   color: var(--text-dim-2);
-  font-size: 0.82rem;
-  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
 }
 
 /* ---------- Channels ---------- */
@@ -533,46 +563,75 @@ a {
 
 .footer__grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr 1fr 1.3fr;
   gap: 1.75rem;
-  padding-top: 2.25rem;
-  padding-bottom: 1.5rem;
+  padding-top: 2.5rem;
+  padding-bottom: 1.75rem;
 }
 
-.footer__grid h3 {
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  margin-bottom: 0.75rem;
+.footer__col h3 {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
   color: var(--text-dim);
+}
+
+.footer__brand .brand__mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
 }
 
 .footer__brand p {
   color: var(--text-dim-2);
-  font-size: 0.88rem;
-  margin-top: 0.6rem;
-  max-width: 34ch;
+  font-size: 0.86rem;
+  margin-top: 0.85rem;
+  max-width: 38ch;
 }
 
-.footer__stat {
-  font-size: 0.88rem;
-  color: var(--text-dim);
+.footer__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.footer__stats div {
+  display: flex;
+  justify-content: space-between;
+  max-width: 160px;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 0.3rem;
+  font-size: 0.86rem;
+}
+
+.footer__stats dt {
+  color: var(--text-dim-2);
+}
+
+.footer__stats dd {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .footer__updated {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   color: var(--text-dim-2);
-  margin-top: 0.4rem;
 }
 
 .footer__links {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  font-size: 0.88rem;
+  gap: 0.5rem;
+  font-size: 0.86rem;
 }
 
 .footer__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--text-dim);
   transition: color 0.15s ease;
 }
@@ -594,6 +653,16 @@ a {
 }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .header__center {
+    display: none;
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 760px) {
   .hero__inner {
     padding: 1.4rem;
@@ -601,13 +670,14 @@ a {
 
   .footer__grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .search input {
     width: 12rem;
   }
 
-  .header__stats .chip:nth-child(2) {
+  .header__right .chip--air {
     display: none;
   }
 }
