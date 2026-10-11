@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Uttar Pradesh Radio — live Akashvani / All India Radio streams for Uttar Pradesh, with a REST catalog and a WebSocket live-status channel.",
+  "license": "MIT",
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
