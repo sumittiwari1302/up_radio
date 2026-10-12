@@ -184,15 +184,16 @@ async function handleApi(request, env, ctx) {
       const webhookUrl = env.CONTACT_WEBHOOK_URL;
       if (webhookUrl) {
         try {
-          const payload = {
-            text: `📬 New contact from UP Radio\n**Name:** ${name}\n**Email:** ${email}\n**Message:** ${message}`,
-            title: 'New Contact Form Submission',
-            tags: ['email', 'contact'],
-          };
+          const messageText = `📬 New contact from UP Radio\nName: ${name}\nEmail: ${email}\nMessage: ${message}`;
           await fetch(webhookUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'Title': 'New Contact Form Submission',
+              'Tags': 'email,contact',
+              'Priority': 'high',
+            },
+            body: messageText,
           });
         } catch (webhookErr) {
           console.warn('Webhook notification failed:', webhookErr);
