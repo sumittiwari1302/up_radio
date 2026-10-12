@@ -149,47 +149,67 @@ async function handleApi(request, env, ctx) {
 
   // POST /api/contact
   if (path === '/api/contact' && request.method === 'POST') {
-    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-    if (await rateLimited(env.RATE_LIMIT, ip)) {
-      return json({ ok: false, error: 'rate_limited' }, 429, request);
+    try {
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+      if (await rateLimited(env.RATE_LIMIT, ip)) {
+        return json({ ok: false, error: 'rate_limited' }, 429, request);
+      }
+
+      const body = await request.json().catch(() => ({}));
+      const name = String(body.name || '').trim().slice(0, 120);
+      const email = String(body.email || '').trim().slice(0, 200);
+      const message = String(body.message || '').trim().slice(0, 4000);
+      const honeypot = String(body.website || body.company || '').trim();
+
+      if (honeypot) return json({ ok: true, queued: true }, 200, request);
+
+      const errors = {};
+      if (!name) errors.name = 'Please enter your name.';
+      if (!EMAIL_RE.test(email)) errors.email = 'Please enter a valid email.';
+      if (message.length < 10) errors.message = 'Message must be at least 10 characters.';
+      if (Object.keys(errors).length) return json({ ok: false, errors }, 422, request);
+
+      const startedAt = Number(body.formOpenedAt);
+      if (startedAt && Date.now() - startedAt < 3000) return json({ ok: true, queued: true }, 200, request);
+
+      const id = `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+      // Try to store, but don't fail if KV limit exceeded
+      try {
+        await env.CONTACTS.put(`contact:${id}`, JSON.stringify({ id, name, email, message, ip, ts: Date.now() }), { expirationTtl: 86400 * 30 });
+      } catch (kvErr) {
+        console.warn('KV put failed (limit exceeded):', kvErr);
+        // Continue anyway - message validated, just not persisted
+      }
+      return json({ ok: true, queued: true }, 200, request);
+    } catch (err) {
+      console.error('Contact form error:', err);
+      return json({ ok: false, error: 'Internal server error', detail: String(err) }, 500, request);
     }
-
-    const body = await request.json().catch(() => ({}));
-    const name = String(body.name || '').trim().slice(0, 120);
-    const email = String(body.email || '').trim().slice(0, 200);
-    const message = String(body.message || '').trim().slice(0, 4000);
-    const honeypot = String(body.website || body.company || '').trim();
-
-    if (honeypot) return json({ ok: true, queued: true }, 200, request);
-
-    const errors = {};
-    if (!name) errors.name = 'Please enter your name.';
-    if (!EMAIL_RE.test(email)) errors.email = 'Please enter a valid email.';
-    if (message.length < 10) errors.message = 'Message must be at least 10 characters.';
-    if (Object.keys(errors).length) return json({ ok: false, errors }, 422, request);
-
-    const startedAt = Number(body.formOpenedAt);
-    if (startedAt && Date.now() - startedAt < 3000) return json({ ok: true, queued: true }, 200, request);
-
-    const id = `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-    await env.CONTACTS.put(`contact:${id}`, JSON.stringify({ id, name, email, message, ip, ts: Date.now() }), { expirationTtl: 86400 * 30 });
-    return json({ ok: true, queued: true }, 200, request);
   }
 
   // POST /api/analytics/event
   if (path === '/api/analytics/event' && request.method === 'POST') {
-    const body = await request.json().catch(() => ({}));
-    const type = String(body.type || 'unknown').slice(0, 64);
-    if (!type) return json({ ok: false }, 400, request);
-    const key = `analytics:${type}`;
-    const current = await env.ANALYTICS.get(key, { type: 'json' }) || 0;
-    await env.ANALYTICS.put(key, JSON.stringify(current + 1), { expirationTtl: 86400 * 90 });
-    if (typeof body.stationId === 'string' && body.stationId) {
-      const skey = `analytics:station:${body.stationId}`;
-      const scurrent = await env.ANALYTICS.get(skey, { type: 'json' }) || 0;
-      await env.ANALYTICS.put(skey, JSON.stringify(scurrent + 1), { expirationTtl: 86400 * 90 });
+    try {
+      const body = await request.json().catch(() => ({}));
+      const type = String(body.type || 'unknown').slice(0, 64);
+      if (!type) return json({ ok: false }, 400, request);
+      const key = `analytics:${type}`;
+      const current = await env.ANALYTICS.get(key, { type: 'json' }) || 0;
+      try {
+        await env.ANALYTICS.put(key, JSON.stringify(current + 1), { expirationTtl: 86400 * 90 });
+      } catch {}
+      if (typeof body.stationId === 'string' && body.stationId) {
+        const skey = `analytics:station:${body.stationId}`;
+        const scurrent = await env.ANALYTICS.get(skey, { type: 'json' }) || 0;
+        try {
+          await env.ANALYTICS.put(skey, JSON.stringify(scurrent + 1), { expirationTtl: 86400 * 90 });
+        } catch {}
+      }
+      return json({ ok: true }, 200, request);
+    } catch (err) {
+      console.error('Analytics error:', err);
+      return json({ ok: false, error: 'Internal server error', detail: String(err) }, 500, request);
     }
-    return json({ ok: true }, 200, request);
   }
 
   // GET /api/analytics
