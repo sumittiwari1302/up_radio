@@ -1,0 +1,39 @@
+name = "up-radio-api"
+main = "worker/index.js"
+compatibility_date = "2024-10-12"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "client/dist"
+binding = "ASSETS"
+
+[[durable_objects.bindings]]
+name = "PRESENCE"
+class_name = "PresenceDO"
+
+[exports.PresenceDO]
+type = "durable-object"
+storage = "sqlite"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "your-rate-limit-kv-id"
+
+[[kv_namespaces]]
+binding = "ANALYTICS"
+id = "your-analytics-kv-id"
+
+[[kv_namespaces]]
+binding = "ERRORS"
+id = "your-errors-kv-id"
+
+[[kv_namespaces]]
+binding = "CONTACTS"
+id = "your-contacts-kv-id"
+
+[[kv_namespaces]]
+binding = "STATUS"
+id = "your-status-kv-id"
+
+[triggers]
+crons = ["*/2 * * * *"]
