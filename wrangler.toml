@@ -17,23 +17,27 @@ storage = "sqlite"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "your-rate-limit-kv-id"
+id = "20462e3f1d0e44fa9fe67bafc11adb39"
 
 [[kv_namespaces]]
 binding = "ANALYTICS"
-id = "your-analytics-kv-id"
+id = "b624c3dc6b54468bae91e233200d4b68"
 
 [[kv_namespaces]]
 binding = "ERRORS"
-id = "your-errors-kv-id"
+id = "d0dfb58b3f814ddf8950ad8eef34c77a"
 
 [[kv_namespaces]]
 binding = "CONTACTS"
-id = "your-contacts-kv-id"
+id = "7ff2c7cdbb63450aaff2897aa3410d4d"
 
 [[kv_namespaces]]
 binding = "STATUS"
-id = "your-status-kv-id"
+id = "462da65571ea4174b661612c97b4fdb5"
+
+[[kv_namespaces]]
+binding = "CATALOG"
+id = "86f686f2150b470f8cab59b41e1a85e1"
 
 [triggers]
 crons = ["*/2 * * * *"]

@@ -1,6 +1,6 @@
 const CONSENT_KEY = 'up-radio:cookieConsent'
 const API_BASE = import.meta.env.PROD
-  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  ? 'https://up-radio-api.sumittiwari0307.workers.dev'
   : '';
 
 function hasConsent() {

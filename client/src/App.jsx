@@ -22,11 +22,11 @@ import { sortForDial } from './lib/frequency.js'
 
 // Production: Worker API, Development: Vite proxy
 const API_BASE = import.meta.env.PROD
-  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  ? 'https://up-radio-api.sumittiwari0307.workers.dev'
   : '';
 
 const WS_URL = import.meta.env.PROD
-  ? 'wss://up-radio-api.YOUR_SUBDOMAIN.workers.dev/ws'
+  ? 'wss://up-radio-api.sumittiwari0307.workers.dev/ws'
   : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`;
 
 function ScrollToTop() {

@@ -7,7 +7,7 @@ import { getUTM } from '../hooks/useUTM.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const API_BASE = import.meta.env.PROD
-  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  ? 'https://up-radio-api.sumittiwari0307.workers.dev'
   : '';
 
 export default function ContactModal({ open, onClose }) {

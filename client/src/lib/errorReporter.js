@@ -1,7 +1,7 @@
 let sent = 0
 let lastAt = 0
 const API_BASE = import.meta.env.PROD
-  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  ? 'https://up-radio-api.sumittiwari0307.workers.dev'
   : '';
 
 function report(payload) {
