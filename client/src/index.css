@@ -458,6 +458,13 @@ a {
   white-space: nowrap;
 }
 
+/* Category badge colors */
+.card__badge--air { background: #1a3a2a; color: #57d38c; border-color: #57d38c; }
+.card__badge--community { background: #2a1a3a; color: #c77dff; border-color: #c77dff; }
+.card__badge--online { background: #1a2a3a; color: #6ab0ff; border-color: #6ab0ff; }
+.card__badge--private { background: #3a2a1a; color: #f4a12a; border-color: #f4a12a; }
+.card__badge--gyanvani { background: #1a3a3a; color: #00d4aa; border-color: #00d4aa; }
+
 .card__meta {
   display: flex;
   gap: 0.75rem;
@@ -811,7 +818,7 @@ a {
 /* ---------- Floating contact ---------- */
 .fab {
   position: fixed;
-  left: 1.25rem;
+  right: 1.25rem;
   bottom: 1.25rem;
   z-index: 90;
   display: inline-flex;
@@ -833,17 +840,31 @@ a {
   transform: translateY(-2px) scale(1.02);
 }
 
+/* Stack FAB and back-to-top vertically on the right */
 @media (max-width: 760px) {
   .fab {
-    left: 1rem;
-    right: auto;
-    bottom: 1rem;
+    right: 1rem;
+    left: auto;
+    bottom: 4.5rem; /* Above back-to-top */
     padding: 0.6rem 0.9rem;
     font-size: 0.8rem;
   }
   .fab .fab__label {
     display: none;
   }
+  
+  .back-to-top {
+    right: 1rem;
+    bottom: 1rem;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Desktop: stack on right side */
+.fab {
+  right: 1.25rem;
+  bottom: 5.5rem; /* Above back-to-top */
 }
 
 /* ---------- Cookie banner ---------- */

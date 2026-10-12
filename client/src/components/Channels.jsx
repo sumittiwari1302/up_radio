@@ -48,7 +48,9 @@ function StationCard({ station, status, isPlaying, onPlay, onStop }) {
           <span className="card__name">{station.name_en}</span>
           {station.name_hi && <span className="card__hi">{station.name_hi}</span>}
         </div>
-        <span className="card__badge">{station.cat_label?.split(' / ')[0] || station.category}</span>
+        <span className={`card__badge card__badge--${station.category}`}>
+            {station.cat_label?.split(' / ')[0] || station.category}
+          </span>
       </div>
 
       <div className="card__meta">
