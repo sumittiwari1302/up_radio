@@ -40,4 +40,4 @@ binding = "CATALOG"
 id = "86f686f2150b470f8cab59b41e1a85e1"
 
 [triggers]
-crons = ["*/2 * * * *"]
+crons = ["*/10 * * * *"]

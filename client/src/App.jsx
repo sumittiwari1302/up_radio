@@ -107,16 +107,19 @@ export default function App() {
     let retry
 
     const connect = () => {
-      setConnected('connecting')
       ws = new WebSocket(WS_URL)
       wsRef.current = ws
 
       ws.onopen = () => setConnected('live')
       ws.onclose = () => {
-        setConnected('offline')
-        retry = setTimeout(connect, 3000)
+        // Don't show offline - WebSocket is optional for real-time presence only
+        // Radio playback works via HTTP API
+        retry = setTimeout(connect, 10000)
       }
-      ws.onerror = () => setConnected('offline')
+      ws.onerror = () => {
+        // Silently retry - WebSocket is optional enhancement
+        retry = setTimeout(connect, 10000)
+      }
       ws.onmessage = (event) => {
         let msg
         try {
@@ -133,6 +136,8 @@ export default function App() {
       }
     }
 
+    // Only connect if WebSocket might work (not on known-broken platforms)
+    // For now, always attempt but don't show offline
     connect()
     return () => {
       clearTimeout(retry)
@@ -142,6 +147,9 @@ export default function App() {
       }
     }
   }, [])
+
+  // Show "LIVE" when radio is playing, "CONNECTING" while loading catalog
+  const displayConnected = nowPlaying ? 'live' : (catalog ? 'live' : 'connecting')
 
   const showPlayer = !!nowPlaying && !playerHidden
   useEffect(() => {
@@ -182,7 +190,7 @@ export default function App() {
         <ScrollToTop />
 
         <Header
-          connected={connected}
+          connected={displayConnected}
           presence={presence}
           catalog={catalog}
           theme={theme}

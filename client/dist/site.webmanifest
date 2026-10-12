@@ -1,0 +1,14 @@
+{
+  "name": "UP Radio — Uttar Pradesh Radio",
+  "short_name": "UP Radio",
+  "description": "Live Uttar Pradesh radio — Akashvani, community and FM streams.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0d",
+  "theme_color": "#f4a12a",
+  "icons": [
+    { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/favicon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

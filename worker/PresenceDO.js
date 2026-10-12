@@ -23,8 +23,21 @@ export class PresenceDO {
   }
 
   async fetch(request) {
+    const url = new URL(request.url);
     const upgradeHeader = request.headers.get('Upgrade');
-    if (upgradeHeader !== 'websocket') {
+
+    // Handle internal WebSocket connection from Worker
+    if (url.pathname === '/websocket-connect') {
+      const ws = request.body;
+      if (ws) {
+        await this.handleWebSocket(ws);
+        return new Response(null, { status: 200 });
+      }
+      return new Response('No WebSocket body', { status: 400 });
+    }
+
+    // Handle direct WebSocket upgrade (fallback)
+    if (!upgradeHeader || upgradeHeader.toLowerCase() !== 'websocket') {
       return new Response('Expected WebSocket', { status: 400 });
     }
 

@@ -5,19 +5,44 @@ const UA = 'Mozilla/5.0 (compatible; up-radio/1.0)';
 const STATUS_TIMEOUT_MS = 8000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+async function handleWebSocketUpgrade(request, env) {
+  const doId = env.PRESENCE.idFromName('global');
+  const stub = env.PRESENCE.get(doId);
+  return stub.fetch(request);
+}
+
+const ALLOWED_ORIGINS = [
+  'https://upradio.pages.dev',
+  'https://upradio.in',
+  'https://www.upradio.in',
+  'http://localhost:5173',
+];
+
 const securityHeaders = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Cross-Origin-Resource-Policy': 'cross-origin',
   'X-DNS-Prefetch-Control': 'on',
-  'Permissions-Policy': 'camera=(), microphone=(self), geolocation=(), interest-cohort=()',
+  'Permissions-Policy': 'camera=(), microphone=(self), geolocation=(), interest-cohort=(), attribution-reporting=(), private-aggregation=(), join-ad-interest-group=(), run-ad-auction=(), browsing-topics=()',
 };
 
-function json(data, status = 200) {
+function corsHeaders(request) {
+  const origin = request.headers.get('Origin') || '';
+  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Credentials': 'true',
+    ...securityHeaders,
+  };
+}
+
+function json(data, status = 200, request) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...securityHeaders },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders(request) },
   });
 }
 
@@ -84,50 +109,49 @@ async function handleApi(request, env, ctx) {
     return json({
       ok: true,
       uptime: Math.round(Date.now() / 1000),
-      listeners: 0, // Would need to get from DO
+      listeners: 0,
       stations: catalog ? flatten(catalog).filter((c) => c.has_stream).length : 0,
       ts: Date.now(),
-    });
+    }, 200, request);
   }
 
   // GET /api/channels
   if (path === '/api/channels' && request.method === 'GET') {
     const catalog = await getCatalog(env);
-    if (!catalog) return json({ error: 'catalog_unavailable' }, 502);
-    return json(catalog);
+    if (!catalog) return json({ error: 'catalog_unavailable' }, 502, request);
+    return json(catalog, 200, request);
   }
 
   // POST /api/channels/refresh
   if (path === '/api/channels/refresh' && request.method === 'POST') {
     const catalog = await refresh(env);
     const statuses = await checkAllStreams(env, catalog);
-    // Notify DO
     const doId = env.PRESENCE.idFromName('global');
     const stub = env.PRESENCE.get(doId);
     await stub.fetch('https://internal/update-statuses', {
       method: 'POST',
       body: JSON.stringify(statuses),
     });
-    return json({ ok: true, count: flatten(catalog).length, updated_at: catalog.updated_at });
+    return json({ ok: true, count: flatten(catalog).length, updated_at: catalog.updated_at }, 200, request);
   }
 
   // GET /api/status
   if (path === '/api/status' && request.method === 'GET') {
     const catalog = await getCatalog(env);
-    if (!catalog) return json({ statuses: {}, ts: Date.now() });
+    if (!catalog) return json({ statuses: {}, ts: Date.now() }, 200, request);
     const statuses = {};
     for (const ch of flatten(catalog).filter((c) => c.has_stream)) {
       const s = await env.STATUS.get(`status:${ch.id}`, { type: 'json' });
       if (s) statuses[ch.id] = s;
     }
-    return json({ statuses, ts: Date.now() });
+    return json({ statuses, ts: Date.now() }, 200, request);
   }
 
   // POST /api/contact
   if (path === '/api/contact' && request.method === 'POST') {
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     if (await rateLimited(env.RATE_LIMIT, ip)) {
-      return json({ ok: false, error: 'rate_limited' }, 429);
+      return json({ ok: false, error: 'rate_limited' }, 429, request);
     }
 
     const body = await request.json().catch(() => ({}));
@@ -136,27 +160,27 @@ async function handleApi(request, env, ctx) {
     const message = String(body.message || '').trim().slice(0, 4000);
     const honeypot = String(body.website || body.company || '').trim();
 
-    if (honeypot) return json({ ok: true, queued: true });
+    if (honeypot) return json({ ok: true, queued: true }, 200, request);
 
     const errors = {};
     if (!name) errors.name = 'Please enter your name.';
     if (!EMAIL_RE.test(email)) errors.email = 'Please enter a valid email.';
     if (message.length < 10) errors.message = 'Message must be at least 10 characters.';
-    if (Object.keys(errors).length) return json({ ok: false, errors }, 422);
+    if (Object.keys(errors).length) return json({ ok: false, errors }, 422, request);
 
     const startedAt = Number(body.formOpenedAt);
-    if (startedAt && Date.now() - startedAt < 3000) return json({ ok: true, queued: true });
+    if (startedAt && Date.now() - startedAt < 3000) return json({ ok: true, queued: true }, 200, request);
 
     const id = `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     await env.CONTACTS.put(`contact:${id}`, JSON.stringify({ id, name, email, message, ip, ts: Date.now() }), { expirationTtl: 86400 * 30 });
-    return json({ ok: true, queued: true });
+    return json({ ok: true, queued: true }, 200, request);
   }
 
   // POST /api/analytics/event
   if (path === '/api/analytics/event' && request.method === 'POST') {
     const body = await request.json().catch(() => ({}));
     const type = String(body.type || 'unknown').slice(0, 64);
-    if (!type) return json({ ok: false }, 400);
+    if (!type) return json({ ok: false }, 400, request);
     const key = `analytics:${type}`;
     const current = await env.ANALYTICS.get(key, { type: 'json' }) || 0;
     await env.ANALYTICS.put(key, JSON.stringify(current + 1), { expirationTtl: 86400 * 90 });
@@ -165,13 +189,12 @@ async function handleApi(request, env, ctx) {
       const scurrent = await env.ANALYTICS.get(skey, { type: 'json' }) || 0;
       await env.ANALYTICS.put(skey, JSON.stringify(scurrent + 1), { expirationTtl: 86400 * 90 });
     }
-    return json({ ok: true });
+    return json({ ok: true }, 200, request);
   }
 
   // GET /api/analytics
   if (path === '/api/analytics' && request.method === 'GET') {
-    // Note: KV list is limited, this is a simplified version
-    return json({ totals: {}, ts: Date.now() });
+    return json({ totals: {}, ts: Date.now() }, 200, request);
   }
 
   // POST /api/errors
@@ -186,12 +209,12 @@ async function handleApi(request, env, ctx) {
     };
     const key = `error:${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     await env.ERRORS.put(key, JSON.stringify(entry), { expirationTtl: 86400 * 7 });
-    return json({ ok: true });
+    return json({ ok: true }, 200, request);
   }
 
   // GET /api/errors
   if (path === '/api/errors' && request.method === 'GET') {
-    return json({ errors: [], ts: Date.now() });
+    return json({ errors: [], ts: Date.now() }, 200, request);
   }
 
   // GET /robots.txt
@@ -199,7 +222,7 @@ async function handleApi(request, env, ctx) {
     const origin = url.origin;
     return new Response(
       `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${origin}/sitemap.xml\n`,
-      { headers: { 'Content-Type': 'text/plain', ...securityHeaders } }
+      { headers: { 'Content-Type': 'text/plain', ...corsHeaders(request) } }
     );
   }
 
@@ -219,7 +242,7 @@ async function handleApi(request, env, ctx) {
     ).join('\n');
     return new Response(
       `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
-      { headers: { 'Content-Type': 'application/xml', ...securityHeaders } }
+      { headers: { 'Content-Type': 'application/xml', ...corsHeaders(request) } }
     );
   }
 
@@ -234,11 +257,9 @@ export default {
     const apiResp = await handleApi(request, env, ctx);
     if (apiResp) return apiResp;
 
-    // WebSocket upgrade
+    // WebSocket upgrade - handle in Worker to preserve Upgrade header
     if (url.pathname === '/ws') {
-      const doId = env.PRESENCE.idFromName('global');
-      const stub = env.PRESENCE.get(doId);
-      return stub.fetch(request);
+      return handleWebSocketUpgrade(request, env);
     }
 
     // Static assets (served by Cloudflare Pages via ASSETS binding)
