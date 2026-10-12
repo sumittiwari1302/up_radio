@@ -20,7 +20,14 @@ import { useRadio } from './hooks/useRadio.js'
 import { track } from './lib/analytics.js'
 import { sortForDial } from './lib/frequency.js'
 
-const WS_URL = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`
+// Production: Worker API, Development: Vite proxy
+const API_BASE = import.meta.env.PROD
+  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  : '';
+
+const WS_URL = import.meta.env.PROD
+  ? 'wss://up-radio-api.YOUR_SUBDOMAIN.workers.dev/ws'
+  : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`;
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -77,7 +84,7 @@ export default function App() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/channels', { headers: { accept: 'application/json' } })
+      const res = await fetch(`${API_BASE}/api/channels`, { headers: { accept: 'application/json' } })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setCatalog(await res.json())
     } catch (err) {

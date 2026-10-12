@@ -1,4 +1,7 @@
 const CONSENT_KEY = 'up-radio:cookieConsent'
+const API_BASE = import.meta.env.PROD
+  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  : '';
 
 function hasConsent() {
   if (typeof window === 'undefined') return false
@@ -18,10 +21,11 @@ export function track(type, data = {}) {
   if (!hasConsent()) return
   try {
     const body = JSON.stringify({ type, ...data, ts: Date.now() })
+    const url = `${API_BASE}/api/analytics/event`
     if (navigator.sendBeacon) {
-      navigator.sendBeacon('/api/analytics/event', new Blob([body], { type: 'application/json' }))
+      navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
     } else {
-      fetch('/api/analytics/event', {
+      fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body,

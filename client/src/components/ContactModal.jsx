@@ -6,6 +6,9 @@ import { useFeedback } from './ui/Feedback.jsx'
 import { getUTM } from '../hooks/useUTM.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const API_BASE = import.meta.env.PROD
+  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  : '';
 
 export default function ContactModal({ open, onClose }) {
   const { toast } = useFeedback()
@@ -37,7 +40,7 @@ export default function ContactModal({ open, onClose }) {
     }
     setStatus('sending')
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ ...values, formOpenedAt: openedAt.current }),

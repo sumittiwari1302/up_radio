@@ -1,5 +1,8 @@
 let sent = 0
 let lastAt = 0
+const API_BASE = import.meta.env.PROD
+  ? 'https://up-radio-api.YOUR_SUBDOMAIN.workers.dev'
+  : '';
 
 function report(payload) {
   if (typeof window === 'undefined') return
@@ -14,10 +17,11 @@ function report(payload) {
       source: 'client',
       ...payload,
     })
+    const url = `${API_BASE}/api/errors`
     if (navigator.sendBeacon) {
-      navigator.sendBeacon('/api/errors', new Blob([body], { type: 'application/json' }))
+      navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
     } else {
-      fetch('/api/errors', {
+      fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body,
