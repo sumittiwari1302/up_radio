@@ -21,8 +21,9 @@ export default function CookieBanner() {
       <div className="cookie__inner">
         <Cookie size={18} className="cookie__icon" />
         <p>
-          We use local storage for playback preferences and basic analytics. No third-party
-          tracking. <a href="#footer">Learn more</a>
+          We use local storage for your playback preferences and, only with your consent,
+          anonymous analytics. No third-party tracking.{' '}
+          <a href="/privacy">Privacy Policy</a>
         </p>
         <div className="cookie__actions">
           <button className="btn btn--ghost" onClick={() => decide('rejected')}>

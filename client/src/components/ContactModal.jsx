@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Send, Loader2, CheckCircle2 } from 'lucide-react'
 import Modal from './ui/Modal.jsx'
 import { Field, TextInput, TextArea } from './ui/Inputs.jsx'
@@ -8,10 +8,11 @@ import { getUTM } from '../hooks/useUTM.js'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function ContactModal({ open, onClose }) {
-  const { toast, confirm } = useFeedback()
-  const [values, setValues] = useState({ name: '', email: '', message: '' })
+  const { toast } = useFeedback()
+  const [values, setValues] = useState({ name: '', email: '', message: '', website: '' })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle') // idle | sending | success
+  const openedAt = useRef(Date.now())
 
   const set = (k) => (e) => {
     setValues((v) => ({ ...v, [k]: e.target.value }))
@@ -35,31 +36,39 @@ export default function ContactModal({ open, onClose }) {
       return
     }
     setStatus('sending')
-    // Simulated submit — wire to a real endpoint if available.
-    await new Promise((r) => setTimeout(r, 1400))
-    setStatus('success')
-
-    await confirm({
-      title: 'Message sent',
-      message:
-        'Thanks! We received your message and will get back to you soon. A campaign tag will be attached if one is present.',
-      confirmLabel: 'Great',
-      cancelLabel: 'Close',
-    }).catch(() => {})
-
-    toast('Message sent successfully.', { type: 'success' })
-    setValues({ name: '', email: '', message: '' })
-    onClose()
-    setStatus('idle')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ...values, formOpenedAt: openedAt.current }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        if (data.errors) setErrors(data.errors)
+        toast(data.error === 'rate_limited' ? 'Too many messages — please try later.' : 'Message could not be sent.', {
+          type: 'error',
+        })
+        setStatus('idle')
+        return
+      }
+      setStatus('success')
+      toast('Message sent successfully.', { type: 'success' })
+      setValues({ name: '', email: '', message: '', website: '' })
+      openedAt.current = Date.now()
+    } catch {
+      toast('Network error — please try again.', { type: 'error' })
+      setStatus('idle')
+    }
   }
 
   const utm = getUTM()
   const hasUTM = Object.keys(utm).filter((k) => k !== 'referrer').length > 0
 
   const reset = () => {
-    setValues({ name: '', email: '', message: '' })
+    setValues({ name: '', email: '', message: '', website: '' })
     setErrors({})
     setStatus('idle')
+    openedAt.current = Date.now()
   }
 
   return (
@@ -67,8 +76,8 @@ export default function ContactModal({ open, onClose }) {
       {status === 'success' ? (
         <div className="form-success">
           <CheckCircle2 size={40} className="form-success__icon" />
-          <h4>Thanks, {values.name || 'friend'}!</h4>
-          <p>Your message has been sent. We’ll reply to {values.email || 'your email'} shortly.</p>
+          <h4>Thanks!</h4>
+          <p>Your message has been sent. We’ll get back to you shortly.</p>
           <button className="btn btn--primary" onClick={reset}>Send another</button>
         </div>
       ) : (
@@ -115,6 +124,20 @@ export default function ContactModal({ open, onClose }) {
               placeholder="Type your message…"
             />
           </Field>
+
+          {/* Honeypot — hidden from humans, bots fill it in. */}
+          <div className="hp-field" aria-hidden="true">
+            <label htmlFor="c-website">Website</label>
+            <input
+              id="c-website"
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={values.website}
+              onChange={set('website')}
+            />
+          </div>
 
           {hasUTM && (
             <p className="form-note">

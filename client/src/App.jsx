@@ -1,22 +1,34 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import Header from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
 import Channels from './components/Channels.jsx'
 import FAQ from './components/FAQ.jsx'
+import Sources from './pages/Sources.jsx'
 import Footer from './components/Footer.jsx'
-import ScrollProgress from './components/ScrollProgress.jsx'
 import BackToTop from './components/BackToTop.jsx'
 import SkipToContent from './components/SkipToContent.jsx'
 import CookieBanner from './components/CookieBanner.jsx'
 import FloatingContact from './components/FloatingContact.jsx'
 import ContactModal from './components/ContactModal.jsx'
-import AuthModal from './components/AuthModal.jsx'
 import MobileMenu from './components/MobileMenu.jsx'
+import StickyPlayer from './components/StickyPlayer.jsx'
 import { FeedbackProvider } from './components/ui/Feedback.jsx'
 import { useTheme } from './hooks/useTheme.js'
 import { useUTM } from './hooks/useUTM.js'
+import { useRadio } from './hooks/useRadio.js'
+import { track } from './lib/analytics.js'
+import { sortForDial } from './lib/frequency.js'
 
 const WS_URL = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
 
 export default function App() {
   const { theme, toggle } = useTheme()
@@ -26,17 +38,40 @@ export default function App() {
   const [status, setStatus] = useState({})
   const [presence, setPresence] = useState({ listeners: 0, nowPlaying: [] })
   const [connected, setConnected] = useState('connecting')
-  const [nowPlaying, setNowPlaying] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
-  const [authOpen, setAuthOpen] = useState(false)
+  const [playerHidden, setPlayerHidden] = useState(false)
 
   const wsRef = useRef(null)
-  const audioRef = useRef(null)
   const pendingStation = useRef(new URLSearchParams(location.search).get('stationId'))
+
+  const notify = useCallback((station) => {
+    if (station) track('play', { stationId: station.id })
+    else track('stop')
+    const ws = wsRef.current
+    if (ws?.readyState !== WebSocket.OPEN) return
+    ws.send(JSON.stringify(station ? { type: 'now-playing', stationId: station.id } : { type: 'stopped' }))
+  }, [])
+
+  const radio = useRadio({ onChange: notify })
+  const { nowPlaying, play, stop, volume, setVolume, muted, toggleMute, analyserRef } = radio
+
+  const changeVolume = useCallback(
+    (v) => {
+      setVolume(v)
+      if (muted && v > 0) toggleMute()
+    },
+    [muted, setVolume, toggleMute]
+  )
+
+  const playableStations = useMemo(() => {
+    const groups = catalog?.station_dashboard?.groups || []
+    const all = groups.flatMap((g) => g.channels || []).filter((c) => c.has_stream)
+    return sortForDial(all)
+  }, [catalog])
 
   const loadCatalog = useCallback(async () => {
     setLoading(true)
@@ -55,6 +90,10 @@ export default function App() {
   useEffect(() => {
     loadCatalog()
   }, [loadCatalog])
+
+  useEffect(() => {
+    track('pageview', { path: location.pathname })
+  }, [])
 
   useEffect(() => {
     let ws
@@ -97,82 +136,119 @@ export default function App() {
     }
   }, [])
 
+  const showPlayer = !!nowPlaying && !playerHidden
   useEffect(() => {
-    audioRef.current = new Audio()
-    audioRef.current.preload = 'none'
-    return () => audioRef.current?.pause()
-  }, [])
+    document.body.classList.toggle('has-player', showPlayer)
+    return () => document.body.classList.remove('has-player')
+  }, [showPlayer])
 
-  const play = useCallback((station) => {
-    if (!station?.stream_url || !audioRef.current) return
-    setNowPlaying(station)
-    audioRef.current.src = station.stream_url
-    audioRef.current.play().catch(() => setNowPlaying(null))
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'now-playing', stationId: station.id }))
-    }
-  }, [])
+  useEffect(() => {
+    if (nowPlaying) setPlayerHidden(false)
+  }, [nowPlaying])
 
-  const stop = useCallback(() => {
-    audioRef.current?.pause()
-    setNowPlaying(null)
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'stopped' }))
-    }
-  }, [])
-
-  // Deep link: ?stationId=... auto-tunes once the catalog is ready.
   useEffect(() => {
     if (!catalog || !pendingStation.current) return
     const id = pendingStation.current
-    const groups = catalog.station_dashboard?.groups || []
-    const found = groups.flatMap((g) => g.channels || []).find((c) => c.id === id)
-    if (found?.has_stream) {
+    const found = playableStations.find((c) => c.id === id)
+    if (found) {
       play(found)
       document.getElementById('channels')?.scrollIntoView({ behavior: 'smooth' })
     }
     pendingStation.current = null
-  }, [catalog, play])
+  }, [catalog, playableStations, play])
+
+  const expandConsole = useCallback(() => {
+    setPlayerHidden(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const navLinks = [
+    { path: '/channels', label: 'Channels' },
+    { path: '/faq', label: 'FAQ' },
+    { path: '/sources', label: 'Sources' },
+  ]
 
   return (
-    <FeedbackProvider>
-      <SkipToContent />
-      <ScrollProgress />
+    <BrowserRouter>
+      <FeedbackProvider>
+        <SkipToContent />
+        <ScrollToTop />
 
-      <Header
-        connected={connected}
-        presence={presence}
-        catalog={catalog}
-        theme={theme}
-        onToggleTheme={toggle}
-        onOpenMenu={() => setMenuOpen(true)}
-        onOpenAuth={() => setAuthOpen(true)}
-      />
-
-      <main id="main">
-        <Hero nowPlaying={nowPlaying} onStop={stop} />
-        <Channels
+        <Header
+          connected={connected}
+          presence={presence}
           catalog={catalog}
-          status={status}
-          loading={loading}
-          error={error}
-          onReload={loadCatalog}
-          nowPlaying={nowPlaying}
-          onPlay={play}
-          onStop={stop}
+          theme={theme}
+          onToggleTheme={toggle}
+          onOpenMenu={() => setMenuOpen(true)}
+          navLinks={navLinks}
         />
-        <FAQ />
-      </main>
 
-      <Footer catalog={catalog} />
+        <main id="main">
+          <Routes>
+            <Route path="/" element={
+              <>
+                <Hero
+                  stations={playableStations}
+                  nowPlaying={nowPlaying}
+                  onPlay={play}
+                  onStop={stop}
+                  analyserRef={analyserRef}
+                  volume={volume}
+                  onVolume={changeVolume}
+                  muted={muted}
+                  onToggleMute={toggleMute}
+                />
+                <Channels
+                  catalog={catalog}
+                  status={status}
+                  loading={loading}
+                  error={error}
+                  onReload={loadCatalog}
+                  nowPlaying={nowPlaying}
+                  onPlay={play}
+                  onStop={stop}
+                />
+              </>
+            } />
+            <Route path="/channels" element={
+              <Channels
+                catalog={catalog}
+                status={status}
+                loading={loading}
+                error={error}
+                onReload={loadCatalog}
+                nowPlaying={nowPlaying}
+                onPlay={play}
+                onStop={stop}
+              />
+            } />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/sources" element={<Sources />} />
+          </Routes>
+        </main>
 
-      <FloatingContact onClick={() => setContactOpen(true)} />
-      <BackToTop />
-      <CookieBanner />
+        <Footer catalog={catalog} onContact={() => setContactOpen(true)} />
 
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} theme={theme} onToggleTheme={toggle} />
-      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
-    </FeedbackProvider>
+        <FloatingContact onClick={() => setContactOpen(true)} />
+        <BackToTop />
+        <CookieBanner />
+
+        <StickyPlayer
+          nowPlaying={nowPlaying}
+          onStop={stop}
+          onExpand={expandConsole}
+          analyserRef={analyserRef}
+          volume={volume}
+          onVolume={changeVolume}
+          muted={muted}
+          onToggleMute={toggleMute}
+          onHide={() => setPlayerHidden(true)}
+        />
+
+        <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} theme={theme} onToggleTheme={toggle} />
+        <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
+      </FeedbackProvider>
+    </BrowserRouter>
   )
 }

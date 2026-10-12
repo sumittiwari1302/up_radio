@@ -3,14 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UP Radio — उत्तर प्रदेश रेडियो</title>
+    <title>UP Radio  -  Live Uttar Pradesh Radio (Akashvani &amp; FM Stations)</title>
     <meta
       name="description"
-      content="Live Uttar Pradesh radio — Akashvani / All India Radio streams from Lucknow, Kanpur, Varanasi, Prayagraj, Agra, Gorakhpur and more."
+      content="Listen to 54 live Uttar Pradesh radio streams  -  Akashvani / All India Radio from Lucknow, Kanpur, Varanasi, Prayagraj, Agra & Gorakhpur, plus community radio, online stations and commercial FM. Free, no sign-up."
     />
+    <meta name="robots" content="index,follow" />
     <meta name="theme-color" content="#0b0b0d" />
+    <meta name="author" content="Sumit Tiwari" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="UP Radio" />
+    <meta property="og:title" content="UP Radio  -  Live Uttar Pradesh Radio (Akashvani &amp; FM Stations)" />
+    <meta
+      property="og:description"
+      content="Listen to 54 live Uttar Pradesh radio streams  -  Akashvani / All India Radio plus community, campus, online and commercial FM from across UP."
+    />
+    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="UP Radio  -  Live Uttar Pradesh Radio" />
+    <meta name="twitter:description" content="54 live Akashvani, community and FM streams from Uttar Pradesh." />
+    <meta name="twitter:image" content="/og-image.jpg" />
 
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f4a12a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' font-weight='700' text-anchor='middle' fill='%231a1204'%3EUP%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,6 +38,37 @@
       rel="stylesheet"
     />
 
+    <script>
+      // Resolve social/canonical URLs against the real origin so sharing works
+      // regardless of the host this is served from.
+      (function () {
+        try {
+          var origin = location.origin;
+          function setAbs(selector, attr) {
+            var el = document.querySelector(selector);
+            if (el) el.setAttribute(attr, origin + (el.getAttribute(attr) || '/'));
+          }
+          // Ensure canonical link exists
+          var canonical = document.querySelector('link[rel="canonical"]');
+          if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.rel = 'canonical';
+            document.head.appendChild(canonical);
+          }
+          // Ensure og:url meta exists
+          var ogUrl = document.querySelector('meta[property="og:url"]');
+          if (!ogUrl) {
+            ogUrl = document.createElement('meta');
+            ogUrl.setAttribute('property', 'og:url');
+            document.head.appendChild(ogUrl);
+          }
+          setAbs('link[rel="canonical"]', 'href');
+          setAbs('meta[property="og:url"]', 'content');
+          setAbs('meta[property="og:image"]', 'content');
+          setAbs('meta[name="twitter:image"]', 'content');
+        } catch (e) {}
+      })();
+    </script>
     <script>
       // Apply saved theme before paint to avoid a flash of the wrong theme.
       (function () {

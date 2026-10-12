@@ -1,27 +1,30 @@
 import React from 'react'
-import { Radio, Menu, LogIn } from 'lucide-react'
+import { Radio, Menu, Link } from 'lucide-react'
+import { Link as RouterLink } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle.jsx'
 
-export default function Header({ connected, presence, catalog, theme, onToggleTheme, onOpenMenu, onOpenAuth }) {
+export default function Header({ connected, presence, catalog, theme, onToggleTheme, onOpenMenu, navLinks }) {
   const counts = catalog?.counts
   const playable = counts?.playable ?? '—'
 
   return (
     <header className="header" id="top">
       <div className="container header__row">
-        <a className="brand" href="#main">
+        <RouterLink className="brand" to="/" aria-label="UP Radio home">
           <span className="brand__mark">UP</span>
           <span className="brand__text">
             <span className="brand__en">UTTAR PRADESH RADIO</span>
             <span className="brand__hi">उत्तर प्रदेश रेडियो</span>
           </span>
-        </a>
+        </RouterLink>
 
         <div className="header__center">
           <nav className="nav" aria-label="Primary">
-            <a href="#channels" className="nav__link">Channels</a>
-            <a href="#faq" className="nav__link">FAQ</a>
-            <a href="#footer" className="nav__link">Sources</a>
+            {navLinks?.map((link) => (
+              <RouterLink key={link.path} to={link.path} className="nav__link">
+                {link.label}
+              </RouterLink>
+            ))}
           </nav>
         </div>
 
@@ -41,10 +44,6 @@ export default function Header({ connected, presence, catalog, theme, onToggleTh
           </span>
 
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-
-          <button className="btn btn--primary header__signin" onClick={onOpenAuth}>
-            <LogIn size={14} /> <span>Sign in</span>
-          </button>
 
           <button className="header__burger" onClick={onOpenMenu} aria-label="Open menu">
             <Menu size={20} />

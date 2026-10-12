@@ -4,14 +4,14 @@ import { Plus } from 'lucide-react'
 const FAQS = [
   {
     q: 'Where do the radio streams come from?',
-    a: 'Every stream points to the broadcaster’s own public web player — Akashvani, community/campus stations and commercial FM. Audio is never hosted or re-encoded here.',
+    a: 'Every stream points to the broadcaster\'s own public web player - Akashvani, community/campus stations and commercial FM. Audio is never hosted or re-encoded here.',
   },
   {
-    q: 'Why do some stations show “No stream”?',
+    q: 'Why do some stations show "No stream"?',
     a: 'Frequencies listed from reference sources do not always have a public online stream. Those stations appear in the directory for completeness but cannot be played.',
   },
   {
-    q: 'A stream is not playing — what can I do?',
+    q: 'A stream is not playing - what can I do?',
     a: 'Upstream servers occasionally go offline or block cross-origin requests. Try another station, reload, or click play again. The online/offline dot reflects the latest reachability check.',
   },
   {
@@ -20,12 +20,12 @@ const FAQS = [
   },
   {
     q: 'Can I share a single station?',
-    a: 'Yes. Use the copy button on any card — it copies a direct link with the station id (and your UTM tags) straight to your clipboard.',
+    a: 'Yes. Use the copy button on any card - it copies a direct link with the station id (and your UTM tags) straight to your clipboard.',
   },
 ]
 
 export default function FAQ() {
-  const [open, setOpen] = useState(0)
+  const [open, setOpen] = useState(-1)
 
   return (
     <section className="faq container" id="faq">

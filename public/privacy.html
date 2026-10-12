@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy — UP Radio</title>
+    <meta name="description" content="How UP Radio handles your data: local storage only, no third-party tracking, and an opt-in cookie consent choice." />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#0b0b0d" />
+
+    <link rel="canonical" href="/privacy" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Privacy Policy — UP Radio" />
+    <meta property="og:description" content="Local storage only, no third-party trackers, and your consent choice is respected." />
+    <meta property="og:url" content="/privacy" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Privacy Policy — UP Radio" />
+    <meta name="twitter:description" content="Local storage only, no third-party trackers, and your consent choice is respected." />
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f4a12a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' font-weight='700' text-anchor='middle' fill='%231a1204'%3EUP%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg: #0b0b0d;
+        --bg-2: #121216;
+        --panel: #16161b;
+        --panel-2: #1b1b21;
+        --text: #f4f4f6;
+        --text-dim: #a2a2ad;
+        --text-dim-2: #8a8a97;
+        --accent: #f4a12a;
+        --accent-ink: #1a1204;
+        --border: #232329;
+        --border-strong: #2e2e36;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+        background: radial-gradient(1100px 600px at 50% -10%, #1d1d23 0%, transparent 60%), var(--bg);
+        color: var(--text);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .top {
+        position: sticky; top: 0; z-index: 10;
+        background: rgba(11,11,13,0.8);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+      }
+      .top-inner { max-width: 1180px; margin: 0 auto; padding: 0.7rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+      .brand { display: flex; align-items: center; gap: 0.7rem; color: var(--text); }
+      .brand:hover { text-decoration: none; }
+      .brand__mark {
+        display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px;
+        background: linear-gradient(150deg, var(--accent), #e07d0c); color: var(--accent-ink);
+        font-weight: 800; letter-spacing: 0.04em;
+      }
+      .brand__en { font-weight: 700; letter-spacing: 0.1em; font-size: 0.82rem; }
+      .brand__hi { font-family: 'Noto Sans Devanagari', sans-serif; font-size: 0.7rem; color: var(--text-dim); }
+      .top-nav { display: flex; gap: 0.4rem; }
+      .top-nav a { color: var(--text-dim); padding: 0.35rem 0.7rem; border-radius: 8px; font-size: 0.84rem; }
+      .top-nav a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
+
+      .wrap { flex: 1; width: 100%; max-width: 760px; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; }
+      .kicker { font-size: 0.72rem; letter-spacing: 0.22em; color: var(--accent); font-weight: 700; text-transform: uppercase; }
+      h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.1; letter-spacing: -0.02em; margin: 0.4rem 0 0.5rem; }
+      .lede { color: var(--text-dim); font-size: 1.05rem; }
+      .meta { color: var(--text-dim-2); font-size: 0.8rem; margin-top: 0.6rem; }
+      .rule { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+      section { margin-bottom: 2.2rem; }
+      h2 { font-size: 1.2rem; letter-spacing: -0.01em; margin-bottom: 0.7rem; }
+      p, li { color: var(--text-dim); font-size: 0.95rem; }
+      p + p { margin-top: 0.75rem; }
+      ul, ol { padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.6rem; }
+      code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 0.86em; background: var(--panel); border: 1px solid var(--border); padding: 0.1rem 0.35rem; border-radius: 6px; color: var(--text); }
+      .back { display: inline-block; margin-bottom: 1.5rem; color: var(--text-dim); font-size: 0.85rem; }
+      .back:hover { color: var(--accent); text-decoration: none; }
+
+      footer { border-top: 1px solid var(--border); background: linear-gradient(180deg, transparent, var(--bg-2)); }
+      .foot-inner { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1.25rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; color: var(--text-dim-2); font-size: 0.8rem; }
+      .foot-inner a { color: var(--text-dim); }
+      @media (max-width: 560px) {
+        .top-nav a.home { display: none; }
+        .wrap { padding-top: 2rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="top-inner">
+        <a class="brand" href="/" aria-label="UP Radio home">
+          <span class="brand__mark">UP</span>
+          <span class="brand__text">
+            <span class="brand__en">UTTAR PRADESH RADIO</span>
+            <span class="brand__hi">उत्तर प्रदेश रेडियो</span>
+          </span>
+        </a>
+        <nav class="top-nav" aria-label="Primary">
+          <a class="home" href="/">Home</a>
+          <a href="/terms">Terms</a>
+          <a href="mailto:sumittiwari1302@gmail.com">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <a class="back" href="/" aria-label="Back to UP Radio">&larr; Back to UP Radio</a>
+      <div class="kicker">Privacy Policy</div>
+      <h1>Privacy Policy</h1>
+      <p class="lede">UP Radio is a directory of public radio streams. Keeping your data minimal is part of the service.</p>
+      <p class="meta">Effective: 1 October 2026</p>
+      <hr class="rule" />
+
+      <section>
+        <h2>1. What we collect</h2>
+        <p>We do <strong>not</strong> require accounts, and we do not collect names, email addresses or payment details. Our servers keep only what is needed to operate:</p>
+        <ul>
+          <li><strong>In-memory presence</strong> — when you play a station, a count of listeners per station is shown on the live badge. This is anonymous and never persisted.</li>
+          <li><strong>Optional analytics</strong> — if you click <em>Accept</em> on the cookie banner we count anonymous page views and plays (station id only). No device fingerprints, no advertising IDs.</li>
+          <li><strong>Contact form</strong> — the details you choose to submit (name, email, message) are used only to reply to you.</li>
+          <li><strong>Error reports</strong> — when the app crashes, basic technical details (page, error message, stack trace) are sent for debugging. They never contain personal data.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>2. Local browser storage</h2>
+        <p>Everything stored in your browser stays in your browser and is not sent to us unless you explicitly consent:</p>
+        <ul>
+          <li><code>up-radio:theme</code> — your light/dark appearance choice.</li>
+          <li><code>up-radio:volume</code> — your player volume.</li>
+          <li><code>up-radio:cookieConsent</code> — your cookie banner choice.</li>
+          <li><code>up-radio:utm</code> — campaign parameters captured from the address bar when you arrive via an ad or link.</li>
+        </ul>
+        <p>You can clear any of these at any time from your browser settings (or just clear site data).</p>
+      </section>
+
+      <section>
+        <h2>3. Cookies &amp; consent</h2>
+        <p>UP Radio sets no advertising or third-party cookies. The banner you see asks for your consent before any analytics event is sent. If you <em>Reject</em>, no analytics are collected at all — the app works exactly the same.</p>
+        <p>Most radio streams are delivered by third parties (Akashvani, commercial networks). They may set their own cookies; that is outside our control and covered by their policies.</p>
+      </section>
+
+      <section>
+        <h2>4. How we protect and share data</h2>
+        <p>Analytics and error data live in memory on our server and are never sold or shared with third parties. Contact messages are only used to answer your query. We do not engage in cross-device tracking, and we never use your data for personalised advertising.</p>
+      </section>
+
+      <section>
+        <h2>5. Your rights</h2>
+        <p>You can ask us for a copy of anything you submitted, request deletion, or withdraw your analytics consent at any time by clearing the relevant local storage entry (or by rejecting consent in the banner). To contact us about your data:</p>
+        <p><a href="mailto:sumittiwari1302@gmail.com">sumittiwari1302@gmail.com</a></p>
+      </section>
+
+      <section>
+        <h2>6. Changes</h2>
+        <p>If this policy changes in a way that affects you, we will update this page and refresh its effective date. Continuing to use UP Radio after an update means you accept the revised policy.</p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="foot-inner">
+        <span>© <span id="year"></span> UP Radio · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></span>
+        <a href="/">Back to the radio</a>
+      </div>
+    </footer>
+    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  </body>
+</html>

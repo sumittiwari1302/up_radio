@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react'
 import { X } from 'lucide-react'
+import { Link as RouterLink } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle.jsx'
 
 const LINKS = [
-  { href: '#channels', label: 'Channels' },
-  { href: '#faq', label: 'FAQ' },
-  { href: '#footer', label: 'Sources' },
-  { href: '#contact', label: 'Contact' },
+  { to: '/channels', label: 'Channels' },
+  { to: '/faq', label: 'FAQ' },
+  { to: '/sources', label: 'Sources' },
+  { href: '/privacy', label: 'Privacy Policy' },
+  { href: '/terms', label: 'Terms & Conditions' },
 ]
 
 export default function MobileMenu({ open, onClose, theme, onToggleTheme }) {
@@ -34,9 +36,9 @@ export default function MobileMenu({ open, onClose, theme, onToggleTheme }) {
 
         <nav className="drawer__nav">
           {LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="drawer__link" onClick={onClose}>
+            <RouterLink key={l.to || l.href} to={l.to || l.href} className="drawer__link" onClick={onClose}>
               {l.label}
-            </a>
+            </RouterLink>
           ))}
         </nav>
 

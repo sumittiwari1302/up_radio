@@ -1,7 +1,19 @@
 import React from 'react'
-import { Square, Radio } from 'lucide-react'
+import { Play } from 'lucide-react'
+import { Link as RouterLink } from 'react-router-dom'
+import RadioConsole from './RadioConsole.jsx'
 
-export default function Hero({ nowPlaying, onStop }) {
+export default function Hero({
+  stations,
+  nowPlaying,
+  onPlay,
+  onStop,
+  analyserRef,
+  volume,
+  onVolume,
+  muted,
+  onToggleMute,
+}) {
   return (
     <section className="hero container">
       <div className="hero__inner">
@@ -11,25 +23,27 @@ export default function Hero({ nowPlaying, onStop }) {
         </h1>
 
         <p className="hero__desc">
-          Live directory of Uttar Pradesh radio streams — Akashvani, community, campus,
-          online and commercial FM. Pick a station below to listen.
+          Listen to 54 live Akashvani, community and FM radio stations from Uttar Pradesh.
+          No sign-up required.
         </p>
 
-        {nowPlaying && (
-          <div className="hero__now">
-            <Radio size={18} />
-            <div>
-              <div className="hero__now-name">{nowPlaying.name_en}</div>
-              {nowPlaying.name_hi && <div className="hero__now-hi">{nowPlaying.name_hi}</div>}
-              <div className="hero__now-meta">
-                {[nowPlaying.city, nowPlaying.frequency, nowPlaying.language].filter(Boolean).join(' • ')}
-              </div>
-            </div>
-            <button className="btn btn--active" onClick={onStop}>
-              <Square size={14} /> Stop
-            </button>
-          </div>
-        )}
+        <div className="hero__cta">
+          <RouterLink className="btn btn--primary btn--lg" to="/channels">
+            <Play size={16} /> Browse all stations
+          </RouterLink>
+        </div>
+
+        <RadioConsole
+          stations={stations}
+          nowPlaying={nowPlaying}
+          onPlay={onPlay}
+          onStop={onStop}
+          analyserRef={analyserRef}
+          volume={volume}
+          onVolume={onVolume}
+          muted={muted}
+          onToggleMute={onToggleMute}
+        />
       </div>
     </section>
   )
