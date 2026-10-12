@@ -178,8 +178,27 @@ async function handleApi(request, env, ctx) {
         await env.CONTACTS.put(`contact:${id}`, JSON.stringify({ id, name, email, message, ip, ts: Date.now() }), { expirationTtl: 86400 * 30 });
       } catch (kvErr) {
         console.warn('KV put failed (limit exceeded):', kvErr);
-        // Continue anyway - message validated, just not persisted
       }
+
+      // Send notification via webhook (ntfy.sh, Discord, Slack, etc.)
+      const webhookUrl = env.CONTACT_WEBHOOK_URL;
+      if (webhookUrl) {
+        try {
+          const payload = {
+            text: `📬 New contact from UP Radio\n**Name:** ${name}\n**Email:** ${email}\n**Message:** ${message}`,
+            title: 'New Contact Form Submission',
+            tags: ['email', 'contact'],
+          };
+          await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+        } catch (webhookErr) {
+          console.warn('Webhook notification failed:', webhookErr);
+        }
+      }
+
       return json({ ok: true, queued: true }, 200, request);
     } catch (err) {
       console.error('Contact form error:', err);
