@@ -3,7 +3,7 @@
  * Reads channels.json from KV or embedded JSON.
  */
 
-import catalogData from '../client/dist/channels.json' with { type: 'json' };
+import catalogData from './channels.json' with { type: 'json' };
 
 export const UPSTREAM_URL = 'https://www.asiawaves.net/india/uttar-pradesh-radio.htm';
 
