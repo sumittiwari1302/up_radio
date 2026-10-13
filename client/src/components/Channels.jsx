@@ -2,15 +2,16 @@ import React, { useMemo, useState } from 'react'
 import { Play, Square, Search, Copy, Check, RotateCw } from 'lucide-react'
 import { withUTM } from '../hooks/useUTM.js'
 import { useFeedback } from './ui/Feedback.jsx'
+import { useLanguage } from '../hooks/useLanguage.js'
 
 const FILTERS = [
-  { id: 'all', label: 'ALL' },
-  { id: 'playable', label: 'PLAYABLE' },
-  { id: 'air', label: 'AKASHVANI' },
-  { id: 'community', label: 'COMMUNITY' },
-  { id: 'gyanvani', label: 'GYANVANI' },
-  { id: 'online', label: 'ONLINE' },
-  { id: 'private', label: 'PRIVATE FM' },
+  { id: 'all', key: 'filters.all' },
+  { id: 'playable', key: 'filters.playable' },
+  { id: 'air', key: 'filters.air' },
+  { id: 'community', key: 'filters.community' },
+  { id: 'gyanvani', key: 'filters.gyanvani' },
+  { id: 'online', key: 'filters.online' },
+  { id: 'private', key: 'filters.private' },
 ]
 
 function useAllChannels(catalog) {
@@ -22,7 +23,7 @@ function useAllChannels(catalog) {
   }, [catalog])
 }
 
-function StationCard({ station, status, isPlaying, onPlay, onStop }) {
+function StationCard({ station, status, isPlaying, onPlay, onStop, t }) {
   const { toast } = useFeedback()
   const [copied, setCopied] = useState(false)
   const st = status?.[station.id]
@@ -34,10 +35,10 @@ function StationCard({ station, status, isPlaying, onPlay, onStop }) {
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast(`Link copied — ${station.name_en}`, { type: 'success' })
+      toast(`${t('toast.linkCopied')} — ${station.name_en}`, { type: 'success' })
       setTimeout(() => setCopied(false), 1600)
     } catch {
-      toast('Could not copy link', { type: 'error' })
+      toast(t('toast.copyFailed'), { type: 'error' })
     }
   }
 
@@ -63,20 +64,20 @@ function StationCard({ station, status, isPlaying, onPlay, onStop }) {
         {station.has_stream ? (
           isPlaying ? (
             <button className="btn btn--active" onClick={() => onStop()}>
-              <Square size={13} /> Stop
+              <Square size={13} /> {t('player.stop')}
             </button>
           ) : (
             <button className="btn" onClick={() => onPlay(station)} disabled={online === false}>
-              <Play size={14} /> Play
+              <Play size={14} /> {t('player.play')}
             </button>
           )
         ) : (
-          <span className="card__na">No stream</span>
+          <span className="card__na">{t('card.noStream')}</span>
         )}
 
-        <span className={`dot ${online === false ? 'dot--off' : online ? 'dot--on' : ''}`} title={online ? 'Online' : online === false ? 'Offline' : 'Unknown'} />
+        <span className={`dot ${online === false ? 'dot--off' : online ? 'dot--on' : ''}`} title={online ? t('status.online') : online === false ? t('status.offline') : t('status.unknown')} />
 
-        <button className="btn btn--ghost" onClick={copy} title="Copy share link">
+        <button className="btn btn--ghost" onClick={copy} title={t('toast.copyLink')}>
           {copied ? <Check size={13} /> : <Copy size={13} />}
         </button>
       </div>
@@ -85,6 +86,7 @@ function StationCard({ station, status, isPlaying, onPlay, onStop }) {
 }
 
 export default function Channels({ catalog, status, loading, error, onReload, nowPlaying, onPlay, onStop }) {
+  const { t } = useLanguage()
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState('all')
   const all = useAllChannels(catalog)
@@ -121,18 +123,18 @@ export default function Channels({ catalog, status, loading, error, onReload, no
     <section className="channels container" id="channels">
       <div className="channels__head">
         <h2>
-          CHANNEL DIRECTORY <span className="hi">/ चैनल सूची</span>
+          {t('channels.title')} <span className="hi">/ {t('channels.titleHi')}</span>
         </h2>
         <div className="search">
           <Search size={15} />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name, city, frequency…"
-            aria-label="Search channels"
+            placeholder={t('channels.search')}
+            aria-label={t('channels.searchAria')}
           />
           {q && (
-            <button className="search__clear" onClick={() => setQ('')} aria-label="Clear search">
+            <button className="search__clear" onClick={() => setQ('')} aria-label={t('search.clear')}>
               ×
             </button>
           )}
@@ -146,7 +148,7 @@ export default function Channels({ catalog, status, loading, error, onReload, no
             className={`filter ${filter === f.id ? 'is-active' : ''}`}
             onClick={() => setFilter(f.id)}
           >
-            {f.label}
+            {t(f.key)}
           </button>
         ))}
       </div>
@@ -166,9 +168,9 @@ export default function Channels({ catalog, status, loading, error, onReload, no
 
       {!loading && error && (
         <div className="empty">
-          <p>Couldn’t load the catalog.</p>
+          <p>{t('error.loadFailed')}</p>
           <button className="btn" onClick={onReload}>
-            <RotateCw size={14} /> Retry
+            <RotateCw size={14} /> {t('button.retry')}
           </button>
         </div>
       )}
@@ -184,10 +186,11 @@ export default function Channels({ catalog, status, loading, error, onReload, no
                 isPlaying={nowPlaying?.id === s.id}
                 onPlay={onPlay}
                 onStop={onStop}
+                t={t}
               />
             ))}
           </div>
-          {filtered.length === 0 && <p className="empty">No channels match “{q || filter}”.</p>}
+          {filtered.length === 0 && <p className="empty">{t('channels.noResults')}</p>}
         </>
       )}
     </section>
