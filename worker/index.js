@@ -180,23 +180,35 @@ async function handleApi(request, env, ctx) {
         console.warn('KV put failed (limit exceeded):', kvErr);
       }
 
-      // Send notification via webhook (ntfy.sh, Discord, Slack, etc.)
-      const webhookUrl = env.CONTACT_WEBHOOK_URL;
-      if (webhookUrl) {
+      // Send notification via email (Resend API)
+      const resendApiKey = env.RESEND_API_KEY;
+      const ownerEmail = env.OWNER_EMAIL || 'sumittiwari1302@gmail.com';
+      if (resendApiKey) {
         try {
-          const messageText = `📬 New contact from UP Radio\nName: ${name}\nEmail: ${email}\nMessage: ${message}`;
-          await fetch(webhookUrl, {
+          const emailHtml = `
+            <h2>📬 New Contact from UP Radio</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message.replace(/\n/g, '<br>')}</p>
+            <hr>
+            <p style="color: #666; font-size: 12px;">Sent from UP Radio contact form</p>
+          `;
+          await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
-              'Content-Type': 'text/plain; charset=utf-8',
-              'Title': 'New Contact Form Submission',
-              'Tags': 'email,contact',
-              'Priority': 'high',
+              'Authorization': `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json',
             },
-            body: messageText,
+            body: JSON.stringify({
+              from: 'UP Radio <onboarding@resend.dev>',
+              to: ownerEmail,
+              subject: 'New Contact Form Submission - UP Radio',
+              html: emailHtml,
+            }),
           });
-        } catch (webhookErr) {
-          console.warn('Webhook notification failed:', webhookErr);
+        } catch (emailErr) {
+          console.warn('Email notification failed:', emailErr);
         }
       }
 
