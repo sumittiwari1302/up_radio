@@ -1,5 +1,5 @@
 import React from 'react'
-import { ExternalLink, Mail, MessageSquare } from 'lucide-react'
+import { ExternalLink, Mail, MessageSquare, Link } from 'lucide-react'
 import { Link as RouterLink } from 'react-router-dom'
 
 const SOURCES = [
@@ -8,8 +8,9 @@ const SOURCES = [
   { label: 'Akashvani - official', href: 'https://akashvani.gov.in' },
 ]
 
-const EMAIL = 'sumittiwari1302@gmail.com'
+const EMAIL = 'sumittiwari0307@gmail.com'
 const GITHUB = 'https://github.com/sumittiwari1302'
+const LINKEDIN = 'https://www.linkedin.com/in/sumit-tiwari-b18701380/'
 
 export default function Footer({ catalog, onContact }) {
   const counts = catalog?.counts
@@ -83,6 +84,11 @@ export default function Footer({ catalog, onContact }) {
               </a>
             </li>
             <li>
+              <a href={LINKEDIN} target="_blank" rel="noopener noreferrer">
+                <Link size={14} /> linkedin.com/in/sumit-tiwari-b18701380
+              </a>
+            </li>
+            <li>
               <button type="button" className="footer__linkbtn" onClick={onContact}>
                 <MessageSquare size={14} /> Send a message
               </button>
@@ -102,6 +108,9 @@ export default function Footer({ catalog, onContact }) {
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
           <a href={`mailto:${EMAIL}`}>Email</a>
+          <a href={LINKEDIN} target="_blank" rel="noopener noreferrer">
+            <Link size={12} /> LinkedIn
+          </a>
         </span>
       </div>
     </footer>

@@ -115,7 +115,8 @@ npx wrangler deploy
 
 | Secret | Description |
 |--------|-------------|
-| `CONTACT_WEBHOOK_URL` | ntfy.sh topic URL (e.g., `https://ntfy.sh/your-topic`) |
+| `RESEND_API_KEY` | Resend API key for email notifications (get from resend.com) |
+| `OWNER_EMAIL` | Email to receive contact form submissions |
 
 ### KV Namespaces (create in Cloudflare Dashboard)
 
@@ -150,28 +151,26 @@ npx wrangler deploy
 
 ---
 
-## Contact Form Notifications
+## Contact Form Notifications (Email via Resend)
 
-Set `CONTACT_WEBHOOK_URL` to receive real-time notifications:
+The contact form sends emails directly via **Resend API** (free tier: 3,000 emails/month).
 
-**ntfy.sh (free, no auth):**
+**Required secrets:**
 ```bash
-wrangler secret put CONTACT_WEBHOOK_URL <<< "https://ntfy.sh/your-topic-name"
-```
-Then visit `https://ntfy.sh/your-topic-name` or install ntfy app.
-
-**Discord/Slack webhook:**
-```bash
-wrangler secret put CONTACT_WEBHOOK_URL <<< "https://discord.com/api/webhooks/..."
+wrangler secret put RESEND_API_KEY <<< "re_your_api_key"
+wrangler secret put OWNER_EMAIL <<< "your@email.com"
 ```
 
-Payload format:
-```json
-{
-  "text": "📬 New contact from UP Radio\n**Name:** John\n**Email:** john@example.com\n**Message:** Hello...",
-  "title": "New Contact Form Submission",
-  "tags": ["email", "contact"]
-}
+**How it works:**
+- Form validates on client + server
+- Submits to `/api/contact`
+- Server sends HTML email via Resend API
+- Returns success without blocking on email delivery
+- Rate limited: 6 req/min/IP
+
+**Test email:**
+```bash
+curl https://your-worker.workers.dev/api/test-email
 ```
 
 ---
@@ -205,4 +204,4 @@ MIT License — see [LICENSE](LICENSE)
 
 ## Author
 
-**Sumit Tiwari** — [GitHub](https://github.com/sumittiwari1302) • [Email](mailto:sumittiwari1302@gmail.com)
+**Sumit Tiwari** — [GitHub](https://github.com/sumittiwari1302) • [LinkedIn](https://www.linkedin.com/in/sumit-tiwari-b18701380/) • [Email](mailto:sumittiwari0307@gmail.com)

@@ -147,6 +147,13 @@ async function handleApi(request, env, ctx) {
     return json({ statuses, ts: Date.now() }, 200, request);
   }
 
+  // POST /api/test-email (test endpoint)
+  if (path === '/api/test-email' && request.method === 'GET') {
+    const resendApiKey = env.RESEND_API_KEY;
+    const ownerEmail = env.OWNER_EMAIL || 'sumittiwari0307@gmail.com';
+    return json({ ok: true, hasApiKey: !!resendApiKey, ownerEmail }, 200, request);
+  }
+
   // POST /api/contact
   if (path === '/api/contact' && request.method === 'POST') {
     try {
@@ -180,9 +187,9 @@ async function handleApi(request, env, ctx) {
         console.warn('KV put failed (limit exceeded):', kvErr);
       }
 
-      // Send notification via email (Resend API)
+// Send notification via email (Resend API)
       const resendApiKey = env.RESEND_API_KEY;
-      const ownerEmail = env.OWNER_EMAIL || 'sumittiwari1302@gmail.com';
+      const ownerEmail = env.OWNER_EMAIL || 'sumittiwari0307@gmail.com';
       if (resendApiKey) {
         try {
           const emailHtml = `
@@ -194,7 +201,7 @@ async function handleApi(request, env, ctx) {
             <hr>
             <p style="color: #666; font-size: 12px;">Sent from UP Radio contact form</p>
           `;
-          await fetch('https://api.resend.com/emails', {
+          const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${resendApiKey}`,
@@ -207,9 +214,16 @@ async function handleApi(request, env, ctx) {
               html: emailHtml,
             }),
           });
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Resend API error:', response.status, errorText);
+            throw new Error(`Resend API error: ${response.status} ${errorText}`);
+          }
         } catch (emailErr) {
-          console.warn('Email notification failed:', emailErr);
+          console.error('Email notification failed:', emailErr);
         }
+      } else {
+        console.warn('RESEND_API_KEY not found in env');
       }
 
       return json({ ok: true, queued: true }, 200, request);
