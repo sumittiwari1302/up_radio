@@ -23,11 +23,17 @@ function useAllChannels(catalog) {
   }, [catalog])
 }
 
-function StationCard({ station, status, isPlaying, onPlay, onStop, t }) {
+function StationCard({ station, status, isPlaying, onPlay, onStop, t, lang }) {
   const { toast } = useFeedback()
   const [copied, setCopied] = useState(false)
   const st = status?.[station.id]
   const online = st?.online
+
+  const getStationName = (station, lang) => {
+    if (lang === 'hi' && station.name_hi) return station.name_hi
+    if (lang === 'bho' && station.name_bho) return station.name_bho
+    return station.name_en
+  }
 
   const copy = async () => {
     const base = `${location.origin}/?stationId=${encodeURIComponent(station.id)}`
@@ -35,19 +41,22 @@ function StationCard({ station, status, isPlaying, onPlay, onStop, t }) {
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      toast(`${t('toast.linkCopied')} — ${station.name_en}`, { type: 'success' })
+      toast(`${t('toast.linkCopied')} — ${getStationName(station, lang)}`, { type: 'success' })
       setTimeout(() => setCopied(false), 1600)
     } catch {
       toast(t('toast.copyFailed'), { type: 'error' })
     }
   }
 
+  const stationName = getStationName(station, lang)
+  const stationNameHi = lang === 'hi' ? station.name_hi : (lang === 'bho' ? station.name_bho : station.name_en)
+
   return (
     <article className="card" data-playing={isPlaying}>
       <div className="card__head">
         <div className="card__titles">
-          <span className="card__name">{station.name_en}</span>
-          {station.name_hi && <span className="card__hi">{station.name_hi}</span>}
+          <span className="card__name">{stationName}</span>
+          {stationNameHi && stationNameHi !== stationName && <span className="card__hi">{stationNameHi}</span>}
         </div>
         <span className={`card__badge card__badge--${station.category}`}>
             {station.cat_label?.split(' / ')[0] || station.category}
@@ -187,6 +196,7 @@ export default function Channels({ catalog, status, loading, error, onReload, no
                 onPlay={onPlay}
                 onStop={onStop}
                 t={t}
+                lang={lang}
               />
             ))}
           </div>

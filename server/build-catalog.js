@@ -62,6 +62,32 @@ const AIR_HI = {
 };
 
 // ---------------------------------------------------------------------------
+// Bhojpuri names for stations, keyed by city.
+// ---------------------------------------------------------------------------
+
+const AIR_BHO = {
+  lucknow: 'आकाशवाणी लखनऊ',
+  kanpur: 'आकाशवाणी कानपुर',
+  prayagraj: 'आकाशवाणी प्रयागराज',
+  allahabad: 'आकाशवाणी प्रयागराज',
+  varanasi: 'आकाशवाणी वाराणसी',
+  agra: 'आकाशवाणी आगरा',
+  gorakhpur: 'आकाशवाणी गोरखपुर',
+  ayodhya: 'आकाशवाणी अयोध्या',
+  faizabad: 'आकाशवाणी अयोध्या',
+  bareilly: 'आकाशवाणी बरेली',
+  jhansi: 'आकाशवाणी झांसी',
+  mathura: 'आकाशवाणी मथुरा',
+  rampur: 'आकाशवाणी रामपुर',
+  najibabad: 'आकाशवाणी नजीबाबाद',
+  obra: 'आकाशवाणी ओबरा',
+  aligarh: 'आकाशवाणी अलीगढ़',
+  meerut: 'आकाशवाणी मेरठ',
+  'rainbow-lucknow': 'एफएम रेनबो लखनऊ',
+  'rainbow-kanpur': 'एफएम रेनबो कानपुर',
+};
+
+// ---------------------------------------------------------------------------
 // Stream maps (free public streams)
 // ---------------------------------------------------------------------------
 
@@ -399,6 +425,7 @@ async function build(outFile = OUT) {
       ch: '',
       name_en: title,
       name_hi: cat === 'air' ? AIR_HI[cityToken] || '' : '',
+      name_bho: cat === 'air' ? AIR_BHO[cityToken] || '' : '',
       city: r.city.replace(/\s*\[.*$/, '').trim(),
       frequency: freqString(freqs),
       freq,
@@ -427,6 +454,7 @@ async function build(outFile = OUT) {
       ch: '',
       name_en: rb.name_en,
       name_hi: AIR_HI[rb.id] || '',
+      name_bho: AIR_BHO[rb.id] || '',
       city: rb.city,
       frequency: rb.frequency,
       freq: rb.freq,
@@ -451,6 +479,7 @@ async function build(outFile = OUT) {
       ch: '',
       name_en: na.name_en,
       name_hi: na.name_hi,
+      name_bho: na.name_hi,
       city: na.city,
       frequency: na.frequency,
       freq: na.freq,
@@ -475,6 +504,7 @@ async function build(outFile = OUT) {
       ch: '',
       name_en: o.name_en,
       name_hi: '',
+      name_bho: '',
       city: o.city,
       frequency: o.frequency,
       freq: o.freq,
