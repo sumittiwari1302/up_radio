@@ -1,0 +1,162 @@
+import { useEffect, useState, useCallback } from 'react'
+
+const KEY = 'up-radio:lang'
+
+const LANGUAGES = [
+  { code: 'en', name: 'English', native: 'English' },
+  { code: 'hi', name: 'हिन्दी', native: 'हिन्दी' },
+  { code: 'bho', name: 'भोजपुरी', native: 'भोजपुरी' },
+]
+
+function getInitial() {
+  if (typeof window === 'undefined') return 'en'
+  const saved = localStorage.getItem(KEY)
+  if (saved && LANGUAGES.some(l => l.code === saved)) return saved
+  // Detect browser language
+  const browserLang = navigator.language.slice(0, 2).toLowerCase()
+  if (LANGUAGES.some(l => l.code === browserLang)) return browserLang
+  return 'en'
+}
+
+export function useLanguage() {
+  const [lang, setLang] = useState(getInitial)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('lang', lang)
+    localStorage.setItem(KEY, lang)
+  }, [lang])
+
+  const setLanguage = useCallback((code) => {
+    if (LANGUAGES.some(l => l.code === code)) {
+      setLang(code)
+    }
+  }, [])
+
+  const t = (key) => {
+    const translations = {
+      en: {
+        'header.live': 'LIVE',
+        'header.connecting': 'CONNECTING',
+        'header.offline': 'OFFLINE',
+        'header.streams': 'STREAMS',
+        'header.onAir': 'ON AIR',
+        'nav.channels': 'Channels',
+        'nav.faq': 'FAQ',
+        'nav.sources': 'Sources',
+        'brand.uttarPradeshRadio': 'UTTAR PRADESH RADIO',
+        'brand.uttarPradeshRadioHi': 'उत्तर प्रदेश रेडियो',
+        'contact.email': 'Email',
+        'contact.linkedin': 'LinkedIn',
+        'contact.github': 'GitHub',
+        'contact.message': 'Send a message',
+        'footer.explore': 'Explore',
+        'footer.legal': 'Legal & sources',
+        'footer.contact': 'Contact',
+        'footer.rights': '© {year} UP Radio · MIT License · Sumit Tiwari',
+        'footer.backToTop': 'Back to top',
+        'hero.title': 'UP Radio',
+        'hero.subtitle': 'उत्तर प्रदेश रेडियो',
+        'hero.desc': 'Listen to 54 live Akashvani, community and FM radio stations from Uttar Pradesh. No sign-up required.',
+        'hero.browse': 'Browse all stations',
+        'channels.title': 'CHANNEL DIRECTORY',
+        'channels.search': 'Search name, city, frequency…',
+        'filters.all': 'ALL',
+        'filters.playable': 'PLAYABLE',
+        'filters.air': 'AKASHVANI',
+        'filters.community': 'COMMUNITY',
+        'filters.gyanvani': 'GYANVANI',
+        'filters.online': 'ONLINE',
+        'filters.private': 'PRIVATE FM',
+        'player.standby': 'STANDBY',
+        'player.noSignal': 'NO SIGNAL',
+        'player.tuneDial': 'Tune the dial or pick a station to start listening',
+        'player.power': 'POWER',
+        'player.frequency': 'FREQUENCY TUNER (KHZ)',
+        'player.volume': 'VOLUME',
+      },
+      hi: {
+        'header.live': 'लाइव',
+        'header.connecting': 'कनेक्ट हो रहा है',
+        'header.offline': 'ऑफलाइन',
+        'header.streams': 'स्ट्रीम्स',
+        'header.onAir': 'ऑन एयर',
+        'nav.channels': 'चैनल्स',
+        'nav.faq': 'प्रश्न',
+        'nav.sources': 'स्रोत',
+        'brand.uttarPradeshRadio': 'उत्तर प्रदेश रेडियो',
+        'brand.uttarPradeshRadioHi': 'उत्तर प्रदेश रेडियो',
+        'contact.email': 'ईमेल',
+        'contact.linkedin': 'लिंक्डइन',
+        'contact.github': 'गिटहब',
+        'contact.message': 'संदेश भेजें',
+        'footer.explore': 'एक्सप्लोर',
+        'footer.legal': 'कानूनी और स्रोत',
+        'footer.contact': 'संपर्क',
+        'footer.rights': '© {year} UP Radio · MIT License · Sumit Tiwari',
+        'footer.backToTop': 'ऊपर जाएं',
+        'hero.title': 'यूपी रेडियो',
+        'hero.subtitle': 'उत्तर प्रदेश रेडियो',
+        'hero.desc': 'उत्तर प्रदेश के 54 लाइव आकाशवाणी, सामुदायिक और FM रेडियो स्टेशन सुनें। कोई साइन-अप नहीं।',
+        'hero.browse': 'सभी स्टेशन देखें',
+        'channels.title': 'चैनल निर्देशिका',
+        'channels.search': 'नाम, शहर, फ्रीक्वेंसी खोजें...',
+        'filters.all': 'सभी',
+        'filters.playable': 'चलाने योग्य',
+        'filters.air': 'आकाशवाणी',
+        'filters.community': 'सामुदायिक',
+        'filters.gyanvani': 'ज्ञानवाणी',
+        'filters.online': 'ऑनलाइन',
+        'filters.private': 'निजी FM',
+        'player.standby': 'तैयार',
+        'player.noSignal': 'कोई सिग्नल नहीं',
+        'player.tuneDial': 'डायल घुमाएं या सुनने के लिए स्टेशन चुनें',
+        'player.power': 'पावर',
+        'player.frequency': 'फ्रीक्वेंसी ट्यूनर (KHZ)',
+        'player.volume': 'आवाज',
+      },
+      bho: {
+        'header.live': 'लाईव',
+        'header.connecting': 'जुड़त बा',
+        'header.offline': 'ऑफलाइन',
+        'header.streams': 'स्ट्रीम',
+        'header.onAir': 'ऑन एयर',
+        'nav.channels': 'चैनल',
+        'nav.faq': 'सवाल',
+        'nav.sources': 'श्रोत',
+        'brand.uttarPradeshRadio': 'उत्तर प्रदेश रेडियो',
+        'brand.uttarPradeshRadioHi': 'उत्तर प्रदेश रेडियो',
+        'contact.email': 'ईमेल',
+        'contact.linkedin': 'लिंक्डइन',
+        'contact.github': 'गिटहब',
+        'contact.message': 'संदेस भेजीं',
+        'footer.explore': 'खोजीं',
+        'footer.legal': 'कानूनी आ स्रोत',
+        'footer.contact': 'संपर्क',
+        'footer.rights': '© {year} UP Radio · MIT License · Sumit Tiwari',
+        'footer.backToTop': 'ऊपर जाई',
+        'hero.title': 'यूपी रेडियो',
+        'hero.subtitle': 'उत्तर प्रदेश रेडियो',
+        'hero.desc': 'उत्तर प्रदेश के 54 लाइव आकाशवाणी, सामुदायिक आ FM रेडियो स्टेशन सुनीं। कोनो साइन-अप नाहीं।',
+        'hero.browse': 'सब स्टेशन देखीं',
+        'channels.title': 'चैनल डायरेक्टरी',
+        'channels.search': 'नाम, शहर, फ्रीक्वेंसी खोजीं...',
+        'filters.all': 'सब',
+        'filters.playable': 'चलावे योग्य',
+        'filters.air': 'आकाशवाणी',
+        'filters.community': 'समुदायिक',
+        'filters.gyanvani': 'ज्ञानवाणी',
+        'filters.online': 'ऑनलाइन',
+        'filters.private': 'प्राइवेट FM',
+        'player.standby': 'तैयार',
+        'player.noSignal': 'कोनो सिग्नल नाहीं',
+        'player.tuneDial': 'डायल घुमाईं आ स्टेशन चुनिं सुनबे खातिर',
+        'player.power': 'पावर',
+        'player.frequency': 'फ्रीक्वेंसी ट्यूनर (KHZ)',
+        'player.volume': 'आवाज',
+      },
+    }
+    return translations[lang]?.[key] || translations.en[key] || key
+  }
+
+  return { lang, setLanguage, t, languages: LANGUAGES }
+}
