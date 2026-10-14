@@ -8,7 +8,28 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 async function handleWebSocketUpgrade(request, env) {
   const doId = env.PRESENCE.idFromName('global');
   const stub = env.PRESENCE.get(doId);
-  return stub.fetch(request);
+
+  // Handle WebSocket upgrade directly in Worker - pass to Durable Object via Handoff
+  const upgradeHeader = request.headers.get('Upgrade');
+  if (upgradeHeader !== 'websocket') {
+    return new Response('Expected WebSocket', { status: 400 });
+  }
+
+  const pair = new WebSocketPair();
+  const client = pair[0];
+  const server = pair[1];
+
+  // Accept the server WebSocket
+  server.accept();
+
+  // Handoff to Durable Object
+  await stub.fetch('https://internal/websocket-connect', {
+    method: 'POST',
+    body: server,
+    headers: { 'Content-Type': 'application/websocket' },
+  });
+
+  return new Response(null, { status: 101, webSocket: server });
 }
 
 const ALLOWED_ORIGINS = [
@@ -104,8 +125,11 @@ async function handleApi(request, env, ctx) {
   }
 
   // GET /api/health
-  if (path === '/api/health' && request.method === 'GET') {
+  if (path === '/api/health' && (request.method === 'GET' || request.method === 'HEAD')) {
     const catalog = await getCatalog(env);
+    if (request.method === 'HEAD') {
+      return new Response(null, { status: 200, headers: corsHeaders(request) });
+    }
     return json({
       ok: true,
       uptime: Math.round(Date.now() / 1000),
@@ -116,9 +140,12 @@ async function handleApi(request, env, ctx) {
   }
 
   // GET /api/channels
-  if (path === '/api/channels' && request.method === 'GET') {
+  if (path === '/api/channels' && (request.method === 'GET' || request.method === 'HEAD')) {
     const catalog = await getCatalog(env);
     if (!catalog) return json({ error: 'catalog_unavailable' }, 502, request);
+    if (request.method === 'HEAD') {
+      return new Response(null, { status: 200, headers: corsHeaders(request) });
+    }
     return json(catalog, 200, request);
   }
 
@@ -136,7 +163,7 @@ async function handleApi(request, env, ctx) {
   }
 
   // GET /api/status
-  if (path === '/api/status' && request.method === 'GET') {
+  if (path === '/api/status' && (request.method === 'GET' || request.method === 'HEAD')) {
     const catalog = await getCatalog(env);
     if (!catalog) return json({ statuses: {}, ts: Date.now() }, 200, request);
     const statuses = {};
@@ -144,13 +171,19 @@ async function handleApi(request, env, ctx) {
       const s = await env.STATUS.get(`status:${ch.id}`, { type: 'json' });
       if (s) statuses[ch.id] = s;
     }
+    if (request.method === 'HEAD') {
+      return new Response(null, { status: 200, headers: corsHeaders(request) });
+    }
     return json({ statuses, ts: Date.now() }, 200, request);
   }
 
-  // POST /api/test-email (test endpoint)
-  if (path === '/api/test-email' && request.method === 'GET') {
+  // GET /api/test-email (test endpoint)
+  if (path === '/api/test-email' && (request.method === 'GET' || request.method === 'HEAD')) {
     const resendApiKey = env.RESEND_API_KEY;
     const ownerEmail = env.OWNER_EMAIL || 'sumittiwari0307@gmail.com';
+    if (request.method === 'HEAD') {
+      return new Response(null, { status: 200, headers: corsHeaders(request) });
+    }
     return json({ ok: true, hasApiKey: !!resendApiKey, ownerEmail }, 200, request);
   }
 
