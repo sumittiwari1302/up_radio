@@ -47,6 +47,7 @@ export default function App() {
   const [connected, setConnected] = useState('connecting')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [initialLoadDone, setInitialLoadDone] = useState(false)
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
@@ -91,6 +92,7 @@ export default function App() {
       setError(err.message || 'Failed to load catalog')
     } finally {
       setLoading(false)
+      setInitialLoadDone(true)
     }
   }, [])
 
@@ -149,7 +151,7 @@ export default function App() {
   }, [])
 
   // Show "LIVE" when radio is playing, "CONNECTING" while loading catalog
-  const displayConnected = nowPlaying ? 'live' : (catalog ? 'live' : 'connecting')
+  const displayConnected = nowPlaying ? 'live' : (initialLoadDone ? 'live' : 'connecting')
 
   const showPlayer = !!nowPlaying && !playerHidden
   useEffect(() => {
@@ -213,6 +215,8 @@ export default function App() {
                   onVolume={changeVolume}
                   muted={muted}
                   onToggleMute={toggleMute}
+                  loading={loading}
+                  error={error}
                 />
                 <Channels
                   catalog={catalog}
