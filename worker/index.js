@@ -27,10 +27,10 @@ async function handleWebSocketUpgrade(request, env) {
   const client = pair[0];
   const server = pair[1];
 
-  // Accept the server WebSocket
+  // Accept the server WebSocket HERE (worker side)
   server.accept();
 
-  // Handoff to Durable Object
+  // Handoff to Durable Object (already accepted)
   try {
     await stub.fetch('https://internal/websocket-connect', {
       method: 'POST',
@@ -41,7 +41,7 @@ async function handleWebSocketUpgrade(request, env) {
     return new Response('WebSocket handoff failed', { status: 500, headers: cors });
   }
 
-  return new Response(null, { status: 101, webSocket: server, headers: cors });
+  return new Response(null, { status: 101, webSocket: client, headers: cors });
 }
 
 const ALLOWED_ORIGINS = [

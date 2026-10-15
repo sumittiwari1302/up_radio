@@ -3,6 +3,8 @@
  * Manages WebSocket connections for live listener presence and stream status.
  */
 
+import { UPSTREAM_URL } from './catalog.js';
+
 export class PresenceDO {
   constructor(state, env) {
     this.state = state;
@@ -18,15 +20,14 @@ export class PresenceDO {
       if (stored) this.statuses = new Map(Object.entries(stored));
     });
 
-    // Periodic status broadcast
-    this.broadcastInterval = setInterval(() => this.broadcastStatus(), 5000);
+    // Periodic status broadcast - reduced to 30s to save Durable Object requests
+    this.broadcastInterval = setInterval(() => this.broadcastStatus(), 30000);
   }
 
   async fetch(request) {
     const url = new URL(request.url);
-    const upgradeHeader = request.headers.get('Upgrade');
 
-    // Handle internal WebSocket connection from Worker
+    // Handle internal WebSocket connection from Worker (no Upgrade header needed)
     if (url.pathname === '/websocket-connect') {
       const ws = request.body;
       if (ws) {
@@ -37,6 +38,7 @@ export class PresenceDO {
     }
 
     // Handle direct WebSocket upgrade (fallback)
+    const upgradeHeader = request.headers.get('Upgrade');
     if (!upgradeHeader || upgradeHeader.toLowerCase() !== 'websocket') {
       return new Response('Expected WebSocket', { status: 400 });
     }
@@ -47,7 +49,8 @@ export class PresenceDO {
   }
 
   async handleWebSocket(ws) {
-    ws.accept();
+    // WebSocket already accepted by Worker during handoff
+    // ws.accept(); // DON'T call accept() again - already done in Worker
     this.clientSeq++;
     const clientId = `c${this.clientSeq}`;
     this.clients.set(ws, { id: clientId, stationId: null });
