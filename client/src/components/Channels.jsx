@@ -95,7 +95,7 @@ function StationCard({ station, status, isPlaying, onPlay, onStop, t, lang }) {
 }
 
 export default function Channels({ catalog, status, loading, error, onReload, nowPlaying, onPlay, onStop }) {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState('all')
   const all = useAllChannels(catalog)

@@ -6,13 +6,21 @@ const STATUS_TIMEOUT_MS = 8000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 async function handleWebSocketUpgrade(request, env) {
+  const origin = request.headers.get('Origin') || '';
+  const isAllowed = ALLOWED_ORIGINS.includes(origin);
+  const cors = {
+    'Access-Control-Allow-Origin': isAllowed ? origin : '*',
+    'Access-Control-Allow-Credentials': isAllowed ? 'true' : 'false',
+    ...securityHeaders,
+  };
+
   const doId = env.PRESENCE.idFromName('global');
   const stub = env.PRESENCE.get(doId);
 
   // Handle WebSocket upgrade directly in Worker - pass to Durable Object via Handoff
   const upgradeHeader = request.headers.get('Upgrade');
   if (upgradeHeader !== 'websocket') {
-    return new Response('Expected WebSocket', { status: 400 });
+    return new Response('Expected WebSocket', { status: 400, headers: cors });
   }
 
   const pair = new WebSocketPair();
@@ -23,13 +31,17 @@ async function handleWebSocketUpgrade(request, env) {
   server.accept();
 
   // Handoff to Durable Object
-  await stub.fetch('https://internal/websocket-connect', {
-    method: 'POST',
-    body: server,
-    headers: { 'Content-Type': 'application/websocket' },
-  });
+  try {
+    await stub.fetch('https://internal/websocket-connect', {
+      method: 'POST',
+      body: server,
+      headers: { 'Content-Type': 'application/websocket' },
+    });
+  } catch (err) {
+    return new Response('WebSocket handoff failed', { status: 500, headers: cors });
+  }
 
-  return new Response(null, { status: 101, webSocket: server });
+  return new Response(null, { status: 101, webSocket: server, headers: cors });
 }
 
 const ALLOWED_ORIGINS = [
@@ -51,12 +63,13 @@ const securityHeaders = {
 
 function corsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
-  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : '*';
+  const isAllowed = ALLOWED_ORIGINS.includes(origin);
+  const allow = isAllowed ? origin : '';
   return {
-    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Origin': allow || '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Credentials': isAllowed ? 'true' : 'false',
     ...securityHeaders,
   };
 }
@@ -115,11 +128,14 @@ async function handleApi(request, env, ctx) {
 
   // CORS preflight
   if (request.method === 'OPTIONS') {
+    const origin = request.headers.get('Origin') || '';
+    const isAllowed = ALLOWED_ORIGINS.includes(origin);
     return new Response(null, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': isAllowed ? origin : '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Credentials': isAllowed ? 'true' : 'false',
         ...securityHeaders,
       },
     });
