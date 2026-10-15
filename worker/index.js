@@ -37,6 +37,7 @@ const ALLOWED_ORIGINS = [
   'https://upradio.in',
   'https://www.upradio.in',
   'http://localhost:5173',
+  'https://up-radio-api.sumittiwari0307.workers.dev',
 ];
 
 const securityHeaders = {
@@ -50,7 +51,7 @@ const securityHeaders = {
 
 function corsHeaders(request) {
   const origin = request.headers.get('Origin') || '';
-  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : '*';
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
